@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0C10">
+<title>Riitm — Create</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ───────── Shared tokens & device frame ───────── */
+:root{
+  --bg:#0B0C10; --card:#14161D; --card-2:#1A1D26; --field:#0F1116;
+  --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.14);
+  --text:#F4F6F8; --muted:#8C93A1; --dim:#5D6370;
+  --lime:#B6FF38; --lime-brand:#9DFF00; --blue:#0062FF; --ink:#000B1C;
+  --fb:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --fd:'Archivo','Inter',system-ui,sans-serif;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{background:#0B0C10}
+body{height:100vh;height:100dvh;overflow:hidden;font-family:var(--fb);color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{color:inherit}
+svg{display:block}
+.stage{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+.stage-bg{position:fixed;inset:0;z-index:0;overflow:hidden}
+.stage-bg svg{width:100%;height:100%}
+.stage-bg::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 34% 55% at 50% 48%,rgba(11,12,16,.7),rgba(11,12,16,.25) 75%)}
+.device-wrap{position:relative;z-index:1;width:410px;height:864px;flex:none}
+.device{position:absolute;left:0;top:0;width:410px;height:864px;padding:10px;border-radius:60px;
+  background:linear-gradient(150deg,#3b3e47,#121318 28%,#0a0b0e 70%,#2b2e36);
+  box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.08),0 50px 120px -30px rgba(0,0,0,.9),0 0 0 1px #000;
+  transform:scale(var(--scale,1));transform-origin:0 0}
+.screen{position:relative;width:100%;height:100%;border-radius:50px;overflow:hidden;background:var(--bg);isolation:isolate}
+.app{position:absolute;inset:0;display:flex;flex-direction:column}
+.statusbar{flex:none;height:50px;padding:17px 30px 0 38px;display:flex;justify-content:space-between;font:600 15px var(--fb);letter-spacing:-.01em}
+.statusbar .sys{display:flex;gap:6px;align-items:center}
+.homebar{position:absolute;bottom:8px;left:50%;width:134px;height:5px;border-radius:3px;background:rgba(255,255,255,.85);transform:translateX(-50%);z-index:60;pointer-events:none}
+.hdr{flex:none;height:56px;padding:0 22px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:5}
+.logo{display:block;height:26px}
+.logo svg{height:26px;width:auto}
+.icon-btn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line-2);background:rgba(255,255,255,.03);transition:background .2s,transform .2s var(--ease)}
+.icon-btn:active{transform:scale(.92)}
+.icon-btn svg{width:19px;height:19px}
+.ico{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.toolbar{position:relative;z-index:2;display:flex;align-items:center;gap:4px;padding:5px;border-radius:999px;background:rgba(11,12,16,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line)}
+.toolbar a,.toolbar button{height:34px;padding:0 14px;border-radius:999px;display:inline-flex;align-items:center;gap:7px;font:500 12.5px var(--fb);color:var(--muted);text-decoration:none;transition:color .2s,background .2s;white-space:nowrap}
+.toolbar a:hover,.toolbar button:hover{color:var(--text);background:rgba(255,255,255,.06)}
+.toolbar a.on{background:var(--lime);color:#0B0C10}
+.toolbar .n{font-variant-numeric:tabular-nums;opacity:.55}
+.toolbar .sep{width:1px;height:18px;background:var(--line-2);margin:0 4px}
+.toolbar svg{width:15px;height:15px}
+.toast{position:absolute;left:50%;bottom:112px;z-index:70;transform:translate(-50%,16px);opacity:0;pointer-events:none;display:flex;align-items:center;gap:10px;max-width:86%;
+  padding:11px 16px;border-radius:16px;background:rgba(26,29,38,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line-2);font:500 13px var(--fb);
+  box-shadow:0 18px 40px -12px rgba(0,0,0,.7);transition:opacity .3s,transform .4s var(--ease)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast i{width:8px;height:8px;border-radius:50%;background:var(--lime);box-shadow:0 0 10px var(--lime);flex:none}
+.reveal{animation:rise .8s var(--ease) both;animation-delay:calc(var(--d,0) * 75ms + 60ms)}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}}
+body.leaving .app{animation:leave .42s var(--ease) forwards}
+@keyframes leave{to{opacity:0;transform:scale(.965);filter:blur(6px)}}
+@keyframes waveSlide{to{transform:translateX(var(--p))}}
+.scroll{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+@media (max-width:520px){
+  .stage{display:block}
+  .stage-bg,.toolbar,.statusbar,.homebar{display:none}
+  .device-wrap{width:100%!important;height:100%!important}
+  .device{width:100%;height:100%;padding:0;border-radius:0;background:none;box-shadow:none;transform:none}
+  .screen{border-radius:0}
+  .app{padding-top:max(env(safe-area-inset-top),8px);padding-bottom:env(safe-area-inset-bottom)}
+}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* ───────── Page 1: Prompt ───────── */
+
+.hero{position:relative;padding:10px 22px 0;min-height:184px}
+.hero h1{position:relative;z-index:2;font:800 33px/1.02 var(--fd);font-stretch:112%;letter-spacing:-.015em;text-shadow:0 2px 24px rgba(11,12,16,.8)}
+.hero h1 em{font-style:normal;color:var(--lime)}
+.hero p{position:relative;z-index:2;margin-top:12px;font:400 15px var(--fb);color:#C3C8D1}
+.hero-art{position:absolute;right:-30px;top:-10px;width:158px;height:184px;z-index:1;--r:8deg}
+.hero-art .tile{position:absolute;inset:0;border-radius:44px;overflow:hidden;transform:rotate(var(--r));
+  box-shadow:0 30px 60px -20px rgba(0,98,255,.55),0 0 0 1px rgba(255,255,255,.08);animation:floaty 6s ease-in-out infinite}
+.hero-art .tile svg{width:100%;height:100%}
+.hero-art .glow{position:absolute;inset:16% 4% 10% 10%;border-radius:50%;background:radial-gradient(circle,rgba(182,255,56,.35),transparent 70%);filter:blur(24px)}
+@keyframes floaty{50%{transform:rotate(calc(var(--r) - 3deg)) translateY(-6px)}}
+
+.card{margin:12px 14px 0;padding:16px 16px 18px;border-radius:26px;background:linear-gradient(180deg,#161922,#12141A);border:1px solid var(--line);box-shadow:0 20px 40px -24px rgba(0,0,0,.8)}
+.field-head{display:flex;justify-content:space-between;align-items:center;font:500 12.5px var(--fb);color:#C3C8D1}
+.field-head span{color:var(--dim);font-variant-numeric:tabular-nums;transition:color .2s}
+.field{position:relative;margin-top:10px;border-radius:16px;background:var(--field);border:1px solid var(--line-2);transition:border-color .25s,box-shadow .25s}
+.field:focus-within,.field.typing{border-color:rgba(182,255,56,.55);box-shadow:0 0 0 4px rgba(182,255,56,.08)}
+.field textarea,.field .mirror{display:block;width:100%;min-height:68px;padding:12px 40px 12px 14px;font:400 14.5px/1.45 var(--fb);color:var(--text);white-space:pre-wrap;word-wrap:break-word}
+.field textarea{background:transparent;border:0;outline:0;resize:none;height:68px}
+.field textarea::placeholder{color:var(--dim)}
+.field .mirror{position:absolute;inset:0;pointer-events:none;display:none}
+.field.typing textarea{color:transparent}
+.field.typing .mirror{display:block}
+.caret{display:inline-block;width:2px;height:1.1em;margin-left:1px;vertical-align:-3px;background:var(--lime);border-radius:1px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.field.shake{animation:shake .45s}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.clear{position:absolute;right:8px;top:9px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;color:var(--muted);transition:opacity .2s,background .2s}
+.clear:hover{background:rgba(255,255,255,.06)}
+.clear svg{width:15px;height:15px}
+.clear.hide{opacity:0;pointer-events:none}
+.group{margin-top:13px}
+.group h3{font:500 13px var(--fb);color:#C3C8D1;margin-bottom:9px}
+.chips{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}
+.chips::-webkit-scrollbar{display:none}
+.chips:not(.grid4){-webkit-mask-image:linear-gradient(90deg,#000 86%,transparent);mask-image:linear-gradient(90deg,#000 86%,transparent)}
+.chips.grid4{display:grid;grid-template-columns:repeat(4,1fr)}
+.chip{flex:none;height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--line-2);font:500 12.5px var(--fb);color:#CDD2DA;background:rgba(255,255,255,.015);
+  transition:background .25s,color .25s,border-color .25s,transform .25s var(--ease),box-shadow .3s}
+.chip:hover{border-color:rgba(255,255,255,.28)}
+.chip:active,.chip.tap{transform:scale(.92)}
+.chips[data-style=lime] .chip.on{background:var(--lime);border-color:var(--lime);color:#0B0C10;font-weight:600;box-shadow:0 6px 18px -6px rgba(182,255,56,.6)}
+.chips[data-style=blue] .chip.on{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600;box-shadow:0 6px 18px -6px rgba(0,98,255,.8)}
+
+.gen-btn{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:12px;width:calc(100% - 28px);height:60px;margin:14px 14px 14px;border-radius:999px;
+  background:var(--lime);color:#0B0C10;font:600 18px var(--fb);letter-spacing:-.01em;
+  box-shadow:0 14px 40px -12px rgba(182,255,56,.65),inset 0 -3px 0 rgba(0,0,0,.08);transition:transform .25s var(--ease),box-shadow .3s}
+.gen-btn svg{width:22px;height:22px;fill:#0B0C10}
+.gen-btn::after{content:"";position:absolute;top:0;bottom:0;width:60px;left:-80px;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-18deg);animation:sheen 3.6s ease-in-out infinite 1.5s}
+@keyframes sheen{0%{left:-80px}35%,100%{left:110%}}
+.gen-btn:hover{box-shadow:0 18px 50px -10px rgba(182,255,56,.8)}
+.gen-btn:active,.gen-btn.press{transform:scale(.96)}
+.gen-btn .spark{animation:twinkle 2.4s ease-in-out infinite}
+@keyframes twinkle{50%{transform:scale(.82) rotate(12deg)}}
+.ripple{position:absolute;border-radius:50%;background:rgba(11,12,16,.22);transform:scale(0);animation:ripple .7s var(--ease) forwards;pointer-events:none}
+@keyframes ripple{to{transform:scale(1);opacity:0}}
+.gen-btn.go{box-shadow:0 0 0 10px rgba(182,255,56,.12),0 0 60px 4px rgba(182,255,56,.5)}
+
+.tabbar{flex:none;display:flex;justify-content:space-around;padding:8px 12px 24px;border-top:1px solid var(--line);background:linear-gradient(180deg,rgba(14,15,20,.9),#0B0C10)}
+.tab{display:flex;flex-direction:column;align-items:center;gap:5px;width:70px;font:500 11.5px var(--fb);color:var(--muted);transition:color .2s}
+.tab .ti{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;transition:background .3s}
+.tab svg{width:22px;height:22px}
+.tab.on{color:var(--text)}
+.tab.on .ti{color:var(--lime);background:radial-gradient(circle,rgba(182,255,56,.18),rgba(182,255,56,.04) 70%);box-shadow:0 0 22px rgba(182,255,56,.25)}
+.tab:not(.on):hover{color:var(--text)}
+@media (max-width:520px){.tabbar{padding-bottom:max(12px,env(safe-area-inset-bottom))}}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="stage-bg" aria-hidden="true"><svg id="bgWaves"></svg></div>
+
+  <div class="device-wrap" id="wrap"><div class="device" id="device"><div class="screen">
+    <div class="app" id="app">
+      <div class="statusbar"><span id="clock">9:41</span><span class="sys">
+        <svg width="18" height="11" viewBox="0 0 18 11" fill="#fff"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="6" rx="1"/><rect x="10" y="2.5" width="3" height="8.5" rx="1"/><rect x="15" y="0" width="3" height="11" rx="1"/></svg>
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="#fff"><path d="M8 2.2c2.3 0 4.4.9 6 2.4l1.2-1.3A10.4 10.4 0 0 0 8 .4 10.4 10.4 0 0 0 .8 3.3L2 4.6a8.6 8.6 0 0 1 6-2.4zm0 3.4c1.4 0 2.6.5 3.6 1.4l1.2-1.3A7 7 0 0 0 8 3.8a7 7 0 0 0-4.8 1.9L4.4 7c1-.9 2.2-1.4 3.6-1.4zM8 9a1.7 1.7 0 0 0-1.2.5L8 10.8l1.2-1.3A1.7 1.7 0 0 0 8 9z"/></svg>
+        <svg width="27" height="13" viewBox="0 0 27 13"><rect x=".5" y=".5" width="23" height="12" rx="3.5" fill="none" stroke="#fff" opacity=".4"/><rect x="2" y="2" width="20" height="9" rx="2" fill="#fff"/><rect x="25" y="4.5" width="1.6" height="4" rx=".8" fill="#fff" opacity=".45"/></svg>
+      </span></div>
+
+      <header class="hdr reveal" style="--d:0">
+        <a class="logo" href="index.html" aria-label="riitm"><svg viewBox="0 0 411 99" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M174.963 22.3626V31.5696H162.846C158.876 31.5696 155.372 32.2296 152.32 33.5386C149.269 34.8586 146.903 36.7176 145.211 39.1266V76.6256H134.63V22.3626H144.548L144.879 28.6106C147.301 26.5646 150.164 25.0136 153.47 23.9466C156.776 22.8906 160.369 22.3516 164.272 22.3516H174.963V22.3626Z" fill="white"/><path d="M186.871 11.671C185.544 10.395 184.892 8.734 184.892 6.688C184.892 4.642 185.555 3.113 186.871 1.859C188.197 0.616 189.922 0 192.045 0C194.168 0 195.904 0.627 197.219 1.859C198.546 3.102 199.198 4.708 199.198 6.688C199.198 8.668 198.535 10.395 197.219 11.671C195.892 12.947 194.168 13.585 192.045 13.585C189.922 13.585 188.186 12.947 186.871 11.671ZM197.341 22.363V76.637H186.76V22.363H197.341Z" fill="white"/><path d="M218.38 11.671C217.054 10.395 216.401 8.734 216.401 6.688C216.401 4.642 217.065 3.113 218.38 1.859C219.707 0.616 221.432 0 223.555 0C225.677 0 227.413 0.627 228.729 1.859C230.056 3.102 230.708 4.708 230.708 6.688C230.708 8.668 230.045 10.395 228.729 11.671C227.402 12.947 225.677 13.585 223.555 13.585C221.432 13.585 219.696 12.947 218.38 11.671ZM228.851 22.363V76.637H218.27V22.363H228.851Z" fill="white"/><path d="M270.178 31.5691V58.9811C270.178 61.6871 270.952 63.7551 272.489 65.1741C274.037 66.6041 276.193 67.3081 278.99 67.3081H291.992V76.6251H278.105C272.378 76.6251 267.879 75.0851 264.606 72.0161C261.333 68.9471 259.697 64.7121 259.697 59.3001V31.5581H239.31V22.3511H256.723C257.972 22.3511 258.813 22.1201 259.255 21.6361C259.697 21.1631 259.918 20.3381 259.918 19.1721V7.78711H270.167V22.3731H295.287V31.5801H270.167L270.178 31.5691Z" fill="white"/><path d="M403.946 28.1167C408.645 32.8357 411 39.6447 411 48.5657V76.6377H400.42V48.5657C400.42 42.7907 398.916 38.3687 395.898 35.2997C392.879 32.2307 388.59 30.6907 383.006 30.6907C378.75 30.6907 374.792 31.7137 371.165 33.7597C367.528 35.8057 364.753 38.5117 362.851 41.8777C363.216 44.2207 363.404 46.4427 363.404 48.5657V76.6377H352.934V48.5657C352.934 42.8677 351.43 38.4677 348.412 35.3547C345.393 32.2527 341.104 30.6907 335.52 30.6907C331.264 30.6907 327.361 31.6917 323.845 33.7047C320.318 35.7177 317.676 38.4017 315.907 41.7677V76.6267H305.437V22.3637H315.243L315.575 29.3817C318.217 26.6757 321.324 24.6077 324.884 23.1887C328.444 21.7587 332.325 21.0547 336.504 21.0547C341.944 21.0547 346.609 21.9897 350.501 23.8487C354.393 25.7077 357.4 28.4357 359.534 32.0217C362.398 28.5127 365.869 25.8067 369.949 23.9037C374.029 22.0007 378.562 21.0547 383.559 21.0547C392.448 21.0547 399.248 23.4087 403.946 28.1277V28.1167Z" fill="white"/><path d="M0.12207 23.463L35.8112 47.663L99.2733 21.714C98.7426 15.312 97.1948 10.23 93.2588 6.314C87.8966 1.023 80.4779 0 70.6601 0H54.5071L15.2137 1.364C11.7752 2.31 8.80112 3.861 6.30244 6.347C1.94633 10.648 0.497978 16.346 0.12207 23.463Z" fill="#9DFF00"/><path d="M17.8006 53.2844L0.199219 76.7364C0.674632 83.4024 2.17826 88.6604 6.25797 92.6864C6.88817 93.3024 7.54048 93.8634 8.22596 94.3694L33.1133 99.0004C33.1133 99.0004 73.8329 98.9674 75.3145 98.9014L99.2731 77.1874C99.45 75.0424 99.5052 72.7544 99.5052 70.3014V61.0504L17.8006 53.2734V53.2844Z" fill="#9DFF00"/><path d="M35.8002 32.373C41.472 32.373 47.9177 17.435 54.5071 0H28.5363C23.5168 0 19.0723 0.297 15.2026 1.364C16.0318 2.783 16.8389 4.224 17.6239 5.654C24.921 19.008 30.3937 32.373 35.8002 32.373Z" fill="#0062FF"/><path d="M75.3145 98.9015C82.8768 98.5495 88.814 97.1085 93.2475 92.6865C97.2056 88.7155 98.7424 83.6225 99.2731 77.1875C88.5155 77.4625 80.9752 86.8565 75.3145 98.9015Z" fill="#0062FF"/><path d="M19.2046 82.082C14.5832 82.082 11.1447 87.439 8.21484 94.38C13.378 98.208 20.1665 99.011 28.8345 99.011H33.1022C29.0114 89.265 24.4452 82.093 19.2046 82.093V82.082Z" fill="#0062FF"/><path d="M35.7997 49.4997L99.505 29.1387V28.6877C99.505 26.2017 99.4387 23.8807 99.2618 21.7027C93.0151 14.7837 87.0006 8.72266 81.2182 8.72266C74.3966 8.72266 66.4583 17.3357 58.509 25.9487C50.5596 34.5617 42.6213 43.1747 35.7997 43.1747C30.3933 43.1747 24.9315 37.8507 17.6234 32.5157C12.7809 28.9737 7.10908 25.4317 0.121617 23.4627C0.0331683 25.0357 0 26.6857 0 28.4017V30.2277L35.7997 49.5107V49.4997Z" fill="#000B1C"/><path d="M19.2045 51.4805C19.2045 51.4805 0 70.3015 0 70.2245V70.3125C0 72.5895 0.0552806 74.7345 0.19901 76.7475C1.73581 75.2515 3.20627 73.4365 4.76519 71.6215C8.46898 67.3205 12.6482 63.0085 19.2045 63.0085C27.3749 63.0085 33.9091 69.9715 39.5698 76.9235C45.2306 83.8865 50.0179 90.8385 54.7167 90.8385C59.4156 90.8385 63.0199 83.3915 69.2223 75.9445C75.4027 68.5415 84.2144 61.1385 99.505 61.0505V58.3445L19.2045 51.4805Z" fill="#000B1C"/><path d="M35.8 49.929L99.5053 39.721V29.15C93.1812 23.892 87.0783 19.25 81.2185 19.25C74.3969 19.25 66.4586 25.685 58.5093 32.12C50.5599 38.555 42.6216 44.99 35.8 44.99C30.3936 44.99 24.9319 41.008 17.6238 37.026C12.748 34.364 7.04306 31.702 -0.0107422 30.228V40.26L35.789 49.929H35.8Z" fill="#0062FF"/><path d="M19.2045 59.8063C27.3749 59.8063 33.9091 65.0093 39.5698 70.2123C45.2306 75.4153 50.0179 80.6183 54.7167 80.6183C59.4156 80.6183 63.0199 75.0523 69.2223 69.4863C75.4027 63.9533 84.2144 58.4093 99.505 58.3543V54.3613H6.68895L0 60.3123V70.2233C1.60314 69.0793 3.13994 67.6603 4.76519 66.2523C8.46898 63.0293 12.6482 59.8173 19.2045 59.8173V59.8063Z" fill="#0062FF"/><path d="M19.2048 55.087C27.3753 55.087 33.9094 57.694 39.5701 60.301C45.2309 62.908 50.0182 65.515 54.717 65.515C59.4159 65.515 63.0202 62.721 69.2226 59.927C75.403 57.155 84.2147 54.372 99.5053 54.35V39.709C93.1812 37.069 87.0783 34.748 81.2185 34.748C74.3969 34.748 66.4586 37.971 58.5093 41.205C50.5599 44.428 42.6216 47.662 35.8 47.662C30.3936 47.662 24.9319 45.66 17.6238 43.669C12.748 42.338 7.04306 40.996 -0.0107422 40.259V60.312C1.59239 59.74 3.12919 59.025 4.75444 58.321C8.45824 56.704 12.6375 55.098 19.1937 55.098L19.2048 55.087Z" fill="white"/></svg></a>
+        <button class="icon-btn" id="profileBtn" aria-label="Profile"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c1.4-3.6 4.2-5.5 7.5-5.5s6.1 1.9 7.5 5.5"/></svg></button>
+      </header>
+
+      <main class="scroll">
+        <section class="hero">
+          <div class="hero-art reveal" style="--d:2" aria-hidden="true">
+            <div class="glow"></div>
+            <div class="tile"><svg id="heroWaves"></svg></div>
+          </div>
+          <h1 class="reveal" style="--d:1">Music<br>generation<br><em>with AI</em></h1>
+          <p class="reveal" style="--d:2">Turn your ideas into unique songs</p>
+        </section>
+
+        <section class="card reveal" style="--d:3">
+          <div class="field-head"><label for="prompt">Describe the song you want to create...</label><span id="count">0/500</span></div>
+          <div class="field" id="field">
+            <textarea id="prompt" maxlength="500" rows="3" placeholder="e.g. A dreamy synthwave track for a late-night drive"></textarea>
+            <div class="mirror" id="mirror" aria-hidden="true"></div>
+            <button class="clear hide" id="clearBtn" aria-label="Clear prompt"><svg class="ico" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+          </div>
+
+          <div class="group"><h3>Mood</h3>
+            <div class="chips" data-group="mood" data-style="lime">
+              <button class="chip">Chill</button><button class="chip">Happy</button><button class="chip">Sad</button><button class="chip">Energetic</button><button class="chip">Romantic</button><button class="chip">Dreamy</button>
+            </div></div>
+          <div class="group"><h3>Genre</h3>
+            <div class="chips" data-group="genre" data-style="blue">
+              <button class="chip">Pop</button><button class="chip">EDM</button><button class="chip">Hip Hop</button><button class="chip">Lo-fi</button><button class="chip">Rock</button><button class="chip">Indie</button><button class="chip">Techno</button>
+            </div></div>
+          <div class="group"><h3>Duration</h3>
+            <div class="chips grid4" data-group="duration" data-style="lime">
+              <button class="chip">30 sec</button><button class="chip">1 min</button><button class="chip">2 min</button><button class="chip">3+ min</button>
+            </div></div>
+        </section>
+
+        <button class="gen-btn reveal" style="--d:4" id="genBtn">
+          <svg class="spark" viewBox="0 0 24 24"><path d="M10 2.5l1.6 4.8a4 4 0 0 0 2.6 2.6L19 11.5l-4.8 1.6a4 4 0 0 0-2.6 2.6L10 20.5l-1.6-4.8a4 4 0 0 0-2.6-2.6L1 11.5l4.8-1.6a4 4 0 0 0 2.6-2.6z"/><path d="M19 1.5l.6 1.9 1.9.6-1.9.6-.6 1.9-.6-1.9-1.9-.6 1.9-.6z"/><path d="M19.5 16l.5 1.5 1.5.5-1.5.5-.5 1.5-.5-1.5-1.5-.5 1.5-.5z"/></svg>
+          <span>Generate Song</span>
+        </button>
+      </main>
+
+      <nav class="tabbar reveal" style="--d:5">
+        <button class="tab" data-tab="Home"><span class="ti"><svg class="ico" viewBox="0 0 24 24"><path d="M3.5 10.5L12 3.5l8.5 7V20a1 1 0 0 1-1 1H15v-6H9v6H4.5a1 1 0 0 1-1-1z"/></svg></span>Home</button>
+        <button class="tab on" data-tab="Create"><span class="ti"><svg class="ico" viewBox="0 0 24 24"><path d="M9 18V5.5l11-2V16"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg></span>Create</button>
+        <button class="tab" data-tab="Library"><span class="ti"><svg class="ico" viewBox="0 0 24 24"><path d="M4 5h10M4 10h10M4 15h6"/><path d="M18 17V6l3 1.2"/><circle cx="15.5" cy="17.5" r="2.5"/></svg></span>Library</button>
+        <button class="tab" data-tab="Search"><span class="ti"><svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5l-4.2-4.2"/></svg></span>Search</button>
+      </nav>
+
+      <div class="toast" id="toast"><i></i><span></span></div>
+    </div>
+    <div class="homebar"></div>
+  </div></div></div>
+
+  <div class="toolbar" aria-label="Prototype controls">
+    <a href="index.html" class="on"><span class="n">01</span>Prompt</a>
+    <a href="generating.html"><span class="n">02</span>Generate</a>
+    <a href="player.html"><span class="n">03</span>Play</a>
+    <span class="sep"></span>
+    <button id="restartBtn"><svg class="ico" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>Restart demo</button>
+    <button id="fsBtn"><svg class="ico" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>Fullscreen</button>
+  </div>
+</div>
+
+<script>
+/* ───────── Shared helpers ───────── */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const store={get(k,d){try{const v=sessionStorage.getItem('riitm:'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+             set(k,v){try{sessionStorage.setItem('riitm:'+k,JSON.stringify(v))}catch(e){}}};
+const params=new URLSearchParams(location.search);
+function go(url){document.body.classList.add('leaving');setTimeout(()=>{location.href=url},400)}
+addEventListener('pageshow',e=>{if(e.persisted)document.body.classList.remove('leaving')});
+let toastT;function toast(msg){const t=$('#toast');$('span',t).textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2400)}
+function fit(){const w=$('#wrap'),d=$('#device');
+  if(matchMedia('(max-width:520px)').matches){w.style.width=w.style.height='';d.style.removeProperty('--scale');return}
+  const s=Math.min(1,(innerHeight-96)/864,(innerWidth-32)/410);d.style.setProperty('--scale',s);w.style.width=410*s+'px';w.style.height=864*s+'px'}
+addEventListener('resize',fit);fit();
+function makeWaves(svg,w,h,bg,layers){
+  svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('preserveAspectRatio','xMidYMid slice');
+  let out=bg?`<rect width="${w}" height="${h}" fill="${bg}"/>`:'';
+  for(const L of layers){const P=L.period||w,step=P/48;let d=`M0 ${h+10}`;
+    for(let x=0;x<=w+P+0.1;x+=step){const y=L.y+L.amp*Math.sin(2*Math.PI*x/P+(L.ph||0))+(L.amp2||0)*Math.sin(4*Math.PI*x/P+(L.ph||0)*1.7);d+=`L${x.toFixed(1)} ${y.toFixed(1)}`}
+    out+=`<path d="${d}L${(w+P).toFixed(1)} ${h+10}Z" fill="${L.c}" style="--p:${-P}px;animation:waveSlide ${L.dur||10}s linear infinite${L.rev?' reverse':''}"/>`}
+  svg.innerHTML=out}
+makeWaves($('#bgWaves'),1600,1000,'#0062FF',[
+  {y:120,amp:90,amp2:30,c:'#9DFF00',period:1600,dur:40,ph:.4},{y:300,amp:110,amp2:25,c:'#000B1C',period:1600,dur:46,rev:1,ph:2},
+  {y:360,amp:110,amp2:25,c:'#0062FF',period:1600,dur:46,rev:1,ph:2},{y:560,amp:120,amp2:40,c:'#9DFF00',period:1600,dur:38,ph:4},
+  {y:640,amp:120,amp2:40,c:'#000B1C',period:1600,dur:38,ph:4.2},{y:820,amp:90,amp2:20,c:'#0062FF',period:1600,dur:50,rev:1,ph:1}]);
+$('#fsBtn').onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}};
+$('#restartBtn').onclick=()=>{try{sessionStorage.clear()}catch(e){}go('index.html')};
+(function clock(){const c=$('#clock');if(!c)return;const tick=()=>{const d=new Date();c.textContent=(d.getHours()%12||12)+':'+String(d.getMinutes()).padStart(2,'0')};tick();setInterval(tick,15000)})();
+
+/* ───────── Page 1 ───────── */
+makeWaves($('#heroWaves'),170,196,'#0062FF',[
+  {y:30,amp:14,c:'#9DFF00',dur:6},{y:62,amp:16,c:'#000B1C',dur:7.5,rev:1,ph:1},{y:70,amp:16,c:'#0062FF',dur:7.5,rev:1,ph:1},
+  {y:94,amp:10,c:'#FFFFFF',dur:9},{y:112,amp:12,c:'#0062FF',dur:9,ph:.6},{y:128,amp:16,c:'#000B1C',dur:6.5,rev:1,ph:2.4},
+  {y:136,amp:16,c:'#9DFF00',dur:6.5,rev:1,ph:2.4},{y:178,amp:10,c:'#0062FF',dur:8,ph:3}]);
+
+const DEMO_TEXT='A chill electronic song about feeling free and enjoying the night';
+const ta=$('#prompt'),field=$('#field'),mirror=$('#mirror'),count=$('#count'),clearBtn=$('#clearBtn'),genBtn=$('#genBtn');
+
+function updateCount(){const n=ta.value.length;count.textContent=n+'/500';count.style.color=n?'#C3C8D1':'';clearBtn.classList.toggle('hide',!n)}
+ta.addEventListener('input',updateCount);
+clearBtn.onclick=()=>{ta.value='';updateCount();ta.focus()};
+
+function select(group,label,animate){const box=$(`.chips[data-group="${group}"]`);
+  $$('.chip',box).forEach(c=>c.classList.toggle('on',c.textContent===label));
+  const on=$$('.chip',box).find(c=>c.textContent===label);
+  if(on){if(box.scrollWidth>box.clientWidth)box.scrollTo({left:Math.max(0,on.offsetLeft-box.clientWidth/2+on.offsetWidth/2),behavior:animate?'smooth':'auto'});
+    if(animate){on.classList.add('tap');setTimeout(()=>on.classList.remove('tap'),220)}}
+  store.set(group,label)}
+const selected=g=>($(`.chips[data-group="${g}"] .chip.on`)||{}).textContent||'';
+$$('.chips').forEach(box=>box.addEventListener('click',e=>{const c=e.target.closest('.chip');if(c)select(box.dataset.group,c.textContent,true)}));
+
+$$('.tab').forEach(t=>t.onclick=()=>{if(!t.classList.contains('on'))toast(`${t.dataset.tab} isn’t part of this prototype — try Create`)});
+$('#profileBtn').onclick=()=>toast('Profile · Riitm Creator plan');
+
+function ripple(btn,x,y){const r=btn.getBoundingClientRect(),s=Math.max(r.width,r.height)*2.2,el=document.createElement('span');
+  const k=r.width/btn.offsetWidth||1; // account for device scaling
+  el.className='ripple';el.style.width=el.style.height=s/k+'px';
+  el.style.left=((x-r.left)/k-s/k/2)+'px';el.style.top=((y-r.top)/k-s/k/2)+'px';btn.appendChild(el);setTimeout(()=>el.remove(),750)}
+
+function generate(x,y){
+  const text=ta.value.trim();
+  if(!text){field.classList.remove('shake');void field.offsetWidth;field.classList.add('shake');toast('Describe your song first');return}
+  const r=genBtn.getBoundingClientRect();ripple(genBtn,x??r.left+r.width/2,y??r.top+r.height/2);
+  genBtn.classList.add('go');
+  store.set('prompt',text);store.set('variation',0);
+  const q=new URLSearchParams({mood:selected('mood')||'Chill',genre:selected('genre')||'EDM',dur:selected('duration')||'1 min'});
+  setTimeout(()=>go('generating.html?'+q),320)}
+genBtn.addEventListener('click',e=>{stopDemo();generate(e.clientX,e.clientY)});
+
+/* Live demo sequence */
+let demoOn=false,timers=[];
+const wait=ms=>new Promise((res,rej)=>{const id=setTimeout(()=>demoOn?res():rej('stop'),ms);timers.push(id)});
+function stopDemo(){if(!demoOn)return;demoOn=false;timers.forEach(clearTimeout);field.classList.remove('typing');genBtn.classList.remove('press');updateCount()}
+async function runDemo(){
+  demoOn=true;
+  select('mood','Happy');select('genre','Pop');select('duration','30 sec');
+  ta.value='';updateCount();field.classList.add('typing');mirror.innerHTML='<span class="caret"></span>';
+  try{
+    await wait(1100);
+    for(let i=1;i<=DEMO_TEXT.length;i++){
+      ta.value=DEMO_TEXT.slice(0,i);updateCount();
+      mirror.textContent=ta.value;mirror.insertAdjacentHTML('beforeend','<span class="caret"></span>');
+      const ch=DEMO_TEXT[i-1];await wait(ch===' '?70+Math.random()*90:28+Math.random()*48);
+    }
+    await wait(450);field.classList.remove('typing');
+    await wait(350);select('mood','Chill',true);
+    await wait(520);select('genre','EDM',true);
+    await wait(520);select('duration','1 min',true);
+    await wait(700);genBtn.classList.add('press');
+    await wait(180);genBtn.classList.remove('press');
+    demoOn=false;generate();
+  }catch(e){}
+}
+// Any real user interaction hands control back to them
+['pointerdown','keydown','wheel'].forEach(ev=>$('#app').addEventListener(ev,e=>{if(e.isTrusted&&demoOn&&!e.target.closest('#genBtn'))stopDemo()},{capture:true,passive:true}));
+
+/* Initial state */
+const isRemix=params.get('remix')==='1';
+if(isRemix||params.get('demo')==='0'){
+  ta.value=store.get('prompt',DEMO_TEXT);
+  select('mood',store.get('mood','Chill'));select('genre',store.get('genre','EDM'));select('duration',store.get('duration','1 min'));
+  updateCount();
+  if(isRemix){ta.value=ta.value.replace(/\s*—\s*remix.*$/i,'')+' — remix with a deeper bassline and a faster tempo';updateCount();setTimeout(()=>toast('Remixing “Midnight Freedom” — tweak and generate'),700)}
+}else{runDemo()}
+</script>
+</body>
+</html>

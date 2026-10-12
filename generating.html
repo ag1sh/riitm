@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0C10">
+<title>Riitm — Creating your track</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ───────── Shared tokens & device frame ───────── */
+:root{
+  --bg:#0B0C10; --card:#14161D; --card-2:#1A1D26; --field:#0F1116;
+  --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.14);
+  --text:#F4F6F8; --muted:#8C93A1; --dim:#5D6370;
+  --lime:#B6FF38; --lime-brand:#9DFF00; --blue:#0062FF; --ink:#000B1C;
+  --fb:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --fd:'Archivo','Inter',system-ui,sans-serif;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{background:#0B0C10}
+body{height:100vh;height:100dvh;overflow:hidden;font-family:var(--fb);color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{color:inherit}
+svg{display:block}
+.stage{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+.stage-bg{position:fixed;inset:0;z-index:0;overflow:hidden}
+.stage-bg svg{width:100%;height:100%}
+.stage-bg::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 34% 55% at 50% 48%,rgba(11,12,16,.7),rgba(11,12,16,.25) 75%)}
+.device-wrap{position:relative;z-index:1;width:410px;height:864px;flex:none}
+.device{position:absolute;left:0;top:0;width:410px;height:864px;padding:10px;border-radius:60px;
+  background:linear-gradient(150deg,#3b3e47,#121318 28%,#0a0b0e 70%,#2b2e36);
+  box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.08),0 50px 120px -30px rgba(0,0,0,.9),0 0 0 1px #000;
+  transform:scale(var(--scale,1));transform-origin:0 0}
+.screen{position:relative;width:100%;height:100%;border-radius:50px;overflow:hidden;background:var(--bg);isolation:isolate}
+.app{position:absolute;inset:0;display:flex;flex-direction:column}
+.statusbar{flex:none;height:50px;padding:17px 30px 0 38px;display:flex;justify-content:space-between;font:600 15px var(--fb);letter-spacing:-.01em;position:relative;z-index:5}
+.statusbar .sys{display:flex;gap:6px;align-items:center}
+.homebar{position:absolute;bottom:8px;left:50%;width:134px;height:5px;border-radius:3px;background:rgba(255,255,255,.85);transform:translateX(-50%);z-index:60;pointer-events:none}
+.hdr{flex:none;height:56px;padding:0 22px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:5}
+.logo{display:block;height:26px}
+.logo svg{height:26px;width:auto}
+.icon-btn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line-2);background:rgba(255,255,255,.03);transition:background .2s,transform .2s var(--ease)}
+.icon-btn:hover{background:rgba(255,255,255,.07)}
+.icon-btn:active{transform:scale(.92)}
+.icon-btn svg{width:19px;height:19px}
+.ico{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.toolbar{position:relative;z-index:2;display:flex;align-items:center;gap:4px;padding:5px;border-radius:999px;background:rgba(11,12,16,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line)}
+.toolbar a,.toolbar button{height:34px;padding:0 14px;border-radius:999px;display:inline-flex;align-items:center;gap:7px;font:500 12.5px var(--fb);color:var(--muted);text-decoration:none;transition:color .2s,background .2s;white-space:nowrap}
+.toolbar a:hover,.toolbar button:hover{color:var(--text);background:rgba(255,255,255,.06)}
+.toolbar a.on{background:var(--lime);color:#0B0C10}
+.toolbar .n{font-variant-numeric:tabular-nums;opacity:.55}
+.toolbar .sep{width:1px;height:18px;background:var(--line-2);margin:0 4px}
+.toolbar svg{width:15px;height:15px}
+.toast{position:absolute;left:50%;bottom:112px;z-index:70;transform:translate(-50%,16px);opacity:0;pointer-events:none;display:flex;align-items:center;gap:10px;max-width:86%;
+  padding:11px 16px;border-radius:16px;background:rgba(26,29,38,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line-2);font:500 13px var(--fb);
+  box-shadow:0 18px 40px -12px rgba(0,0,0,.7);transition:opacity .3s,transform .4s var(--ease)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast i{width:8px;height:8px;border-radius:50%;background:var(--lime);box-shadow:0 0 10px var(--lime);flex:none}
+.reveal{animation:rise .8s var(--ease) both;animation-delay:calc(var(--d,0) * 75ms + 60ms)}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}}
+body.leaving .app{animation:leave .42s var(--ease) forwards}
+@keyframes leave{to{opacity:0;transform:scale(.965);filter:blur(6px)}}
+@keyframes waveSlide{to{transform:translateX(var(--p))}}
+@media (max-width:520px){
+  .stage{display:block}
+  .stage-bg,.toolbar,.statusbar,.homebar{display:none}
+  .device-wrap{width:100%!important;height:100%!important}
+  .device{width:100%;height:100%;padding:0;border-radius:0;background:none;box-shadow:none;transform:none}
+  .screen{border-radius:0}
+  .app{padding-top:max(env(safe-area-inset-top),8px)}
+}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* ───────── Page 2: Generating ───────── */
+.app::before{content:"";position:absolute;left:50%;top:38%;width:520px;height:520px;transform:translate(-50%,-50%);border-radius:50%;
+  background:radial-gradient(circle,rgba(0,98,255,.22),rgba(0,98,255,.06) 45%,transparent 70%);pointer-events:none;z-index:0}
+.intro{position:relative;z-index:2;flex:none;text-align:center;padding:14px 28px 0}
+.intro h1{font:800 31px/1.06 var(--fd);font-stretch:108%;letter-spacing:-.015em;min-height:66px}
+.intro h1 .dots i{font-style:normal;animation:dot 1.4s infinite both}
+.intro h1 .dots i:nth-child(2){animation-delay:.2s}.intro h1 .dots i:nth-child(3){animation-delay:.4s}
+@keyframes dot{0%,80%,100%{opacity:.15}40%{opacity:1}}
+.intro p{margin:10px auto 0;max-width:290px;font:400 14.5px/1.45 var(--fb);color:#AEB4BF}
+.intro h1.done{color:var(--lime)}
+
+.viz{position:relative;z-index:1;flex:1;min-height:200px;display:grid;place-items:center}
+.viz canvas{display:block}
+.pct{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none}
+.pct b{font:700 44px/1 var(--fd);font-stretch:100%;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.pct b i{font-style:normal}
+.pct b small{font-size:.5em;font-weight:600;margin-left:2px;vertical-align:.7em;color:var(--lime)}
+.pct span{display:block;margin-top:6px;font:600 10px var(--fb);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);transition:opacity .3s}
+.pct.pop b{animation:pop .6s var(--ease)}
+@keyframes pop{40%{transform:scale(1.18)}}
+
+.meta{position:relative;z-index:3;flex:none;display:flex;justify-content:center;gap:6px;flex-wrap:nowrap;padding:0 16px 30px}
+.tag{height:26px;padding:0 10px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;font:500 11.5px var(--fb);color:#CDD2DA;
+  background:rgba(255,255,255,.05);border:1px solid var(--line);opacity:0;transform:translateY(8px) scale(.9);transition:opacity .45s,transform .5s var(--ease)}
+.tag.in{opacity:1;transform:none}
+.tag em{font-style:normal;color:var(--lime)}
+
+.bottom{position:relative;flex:none;z-index:2}
+.bottom .waves{position:absolute;left:0;right:0;top:-74px;height:150px}
+.bottom .waves svg{width:100%;height:100%}
+.steps{position:relative;margin:0 14px 30px;padding:10px 18px 12px;border-radius:26px;background:linear-gradient(180deg,#171A23,#12141A);border:1px solid var(--line);box-shadow:0 -10px 40px -10px rgba(0,0,0,.6)}
+.bar{height:3px;border-radius:3px;background:rgba(255,255,255,.07);margin:6px 0 6px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;border-radius:3px;background:linear-gradient(90deg,var(--blue),var(--lime));box-shadow:0 0 12px rgba(182,255,56,.6)}
+.step{display:flex;align-items:center;gap:14px;height:44px;font:500 14.5px var(--fb);color:var(--dim);transition:color .35s}
+.step .st{position:relative;width:22px;height:22px;flex:none;border-radius:50%;border:1.6px solid rgba(255,255,255,.2);transition:border-color .3s,background .3s,box-shadow .3s}
+.step .st svg{position:absolute;inset:3px;width:13px;height:13px;stroke:#0B0C10;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:24;stroke-dashoffset:24;transition:stroke-dashoffset .4s .1s var(--ease)}
+.step .st::after{content:"";position:absolute;inset:-3.6px;border-radius:50%;border:2.4px solid transparent;opacity:0}
+.step small{margin-left:auto;font:500 11.5px var(--fb);color:var(--muted);opacity:0;transform:translateX(6px);transition:opacity .3s,transform .4s var(--ease);white-space:nowrap}
+.step.active{color:var(--text)}
+.step.active .st{border-color:rgba(182,255,56,.25)}
+.step.active .st::after{opacity:1;border-top-color:var(--lime);border-right-color:var(--lime);animation:spin .8s linear infinite;box-shadow:0 0 12px rgba(182,255,56,.35)}
+.step.active small,.step.done small{opacity:1;transform:none}
+.step.done{color:#C9CED6}
+.step.done .st{background:var(--lime);border-color:var(--lime);box-shadow:0 0 14px rgba(182,255,56,.45)}
+.step.done .st svg{stroke-dashoffset:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (max-width:520px){.steps{margin-bottom:max(16px,env(safe-area-inset-bottom))}}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="stage-bg" aria-hidden="true"><svg id="bgWaves"></svg></div>
+
+  <div class="device-wrap" id="wrap"><div class="device" id="device"><div class="screen">
+    <div class="app" id="app">
+      <div class="statusbar"><span id="clock">9:41</span><span class="sys">
+        <svg width="18" height="11" viewBox="0 0 18 11" fill="#fff"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="6" rx="1"/><rect x="10" y="2.5" width="3" height="8.5" rx="1"/><rect x="15" y="0" width="3" height="11" rx="1"/></svg>
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="#fff"><path d="M8 2.2c2.3 0 4.4.9 6 2.4l1.2-1.3A10.4 10.4 0 0 0 8 .4 10.4 10.4 0 0 0 .8 3.3L2 4.6a8.6 8.6 0 0 1 6-2.4zm0 3.4c1.4 0 2.6.5 3.6 1.4l1.2-1.3A7 7 0 0 0 8 3.8a7 7 0 0 0-4.8 1.9L4.4 7c1-.9 2.2-1.4 3.6-1.4zM8 9a1.7 1.7 0 0 0-1.2.5L8 10.8l1.2-1.3A1.7 1.7 0 0 0 8 9z"/></svg>
+        <svg width="27" height="13" viewBox="0 0 27 13"><rect x=".5" y=".5" width="23" height="12" rx="3.5" fill="none" stroke="#fff" opacity=".4"/><rect x="2" y="2" width="20" height="9" rx="2" fill="#fff"/><rect x="25" y="4.5" width="1.6" height="4" rx=".8" fill="#fff" opacity=".45"/></svg>
+      </span></div>
+
+      <header class="hdr reveal" style="--d:0">
+        <a class="logo" href="index.html?demo=0" aria-label="riitm"><svg viewBox="0 0 411 99" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M174.963 22.3626V31.5696H162.846C158.876 31.5696 155.372 32.2296 152.32 33.5386C149.269 34.8586 146.903 36.7176 145.211 39.1266V76.6256H134.63V22.3626H144.548L144.879 28.6106C147.301 26.5646 150.164 25.0136 153.47 23.9466C156.776 22.8906 160.369 22.3516 164.272 22.3516H174.963V22.3626Z" fill="white"/><path d="M186.871 11.671C185.544 10.395 184.892 8.734 184.892 6.688C184.892 4.642 185.555 3.113 186.871 1.859C188.197 0.616 189.922 0 192.045 0C194.168 0 195.904 0.627 197.219 1.859C198.546 3.102 199.198 4.708 199.198 6.688C199.198 8.668 198.535 10.395 197.219 11.671C195.892 12.947 194.168 13.585 192.045 13.585C189.922 13.585 188.186 12.947 186.871 11.671ZM197.341 22.363V76.637H186.76V22.363H197.341Z" fill="white"/><path d="M218.38 11.671C217.054 10.395 216.401 8.734 216.401 6.688C216.401 4.642 217.065 3.113 218.38 1.859C219.707 0.616 221.432 0 223.555 0C225.677 0 227.413 0.627 228.729 1.859C230.056 3.102 230.708 4.708 230.708 6.688C230.708 8.668 230.045 10.395 228.729 11.671C227.402 12.947 225.677 13.585 223.555 13.585C221.432 13.585 219.696 12.947 218.38 11.671ZM228.851 22.363V76.637H218.27V22.363H228.851Z" fill="white"/><path d="M270.178 31.5691V58.9811C270.178 61.6871 270.952 63.7551 272.489 65.1741C274.037 66.6041 276.193 67.3081 278.99 67.3081H291.992V76.6251H278.105C272.378 76.6251 267.879 75.0851 264.606 72.0161C261.333 68.9471 259.697 64.7121 259.697 59.3001V31.5581H239.31V22.3511H256.723C257.972 22.3511 258.813 22.1201 259.255 21.6361C259.697 21.1631 259.918 20.3381 259.918 19.1721V7.78711H270.167V22.3731H295.287V31.5801H270.167L270.178 31.5691Z" fill="white"/><path d="M403.946 28.1167C408.645 32.8357 411 39.6447 411 48.5657V76.6377H400.42V48.5657C400.42 42.7907 398.916 38.3687 395.898 35.2997C392.879 32.2307 388.59 30.6907 383.006 30.6907C378.75 30.6907 374.792 31.7137 371.165 33.7597C367.528 35.8057 364.753 38.5117 362.851 41.8777C363.216 44.2207 363.404 46.4427 363.404 48.5657V76.6377H352.934V48.5657C352.934 42.8677 351.43 38.4677 348.412 35.3547C345.393 32.2527 341.104 30.6907 335.52 30.6907C331.264 30.6907 327.361 31.6917 323.845 33.7047C320.318 35.7177 317.676 38.4017 315.907 41.7677V76.6267H305.437V22.3637H315.243L315.575 29.3817C318.217 26.6757 321.324 24.6077 324.884 23.1887C328.444 21.7587 332.325 21.0547 336.504 21.0547C341.944 21.0547 346.609 21.9897 350.501 23.8487C354.393 25.7077 357.4 28.4357 359.534 32.0217C362.398 28.5127 365.869 25.8067 369.949 23.9037C374.029 22.0007 378.562 21.0547 383.559 21.0547C392.448 21.0547 399.248 23.4087 403.946 28.1277V28.1167Z" fill="white"/><path d="M0.12207 23.463L35.8112 47.663L99.2733 21.714C98.7426 15.312 97.1948 10.23 93.2588 6.314C87.8966 1.023 80.4779 0 70.6601 0H54.5071L15.2137 1.364C11.7752 2.31 8.80112 3.861 6.30244 6.347C1.94633 10.648 0.497978 16.346 0.12207 23.463Z" fill="#9DFF00"/><path d="M17.8006 53.2844L0.199219 76.7364C0.674632 83.4024 2.17826 88.6604 6.25797 92.6864C6.88817 93.3024 7.54048 93.8634 8.22596 94.3694L33.1133 99.0004C33.1133 99.0004 73.8329 98.9674 75.3145 98.9014L99.2731 77.1874C99.45 75.0424 99.5052 72.7544 99.5052 70.3014V61.0504L17.8006 53.2734V53.2844Z" fill="#9DFF00"/><path d="M35.8002 32.373C41.472 32.373 47.9177 17.435 54.5071 0H28.5363C23.5168 0 19.0723 0.297 15.2026 1.364C16.0318 2.783 16.8389 4.224 17.6239 5.654C24.921 19.008 30.3937 32.373 35.8002 32.373Z" fill="#0062FF"/><path d="M75.3145 98.9015C82.8768 98.5495 88.814 97.1085 93.2475 92.6865C97.2056 88.7155 98.7424 83.6225 99.2731 77.1875C88.5155 77.4625 80.9752 86.8565 75.3145 98.9015Z" fill="#0062FF"/><path d="M19.2046 82.082C14.5832 82.082 11.1447 87.439 8.21484 94.38C13.378 98.208 20.1665 99.011 28.8345 99.011H33.1022C29.0114 89.265 24.4452 82.093 19.2046 82.093V82.082Z" fill="#0062FF"/><path d="M35.7997 49.4997L99.505 29.1387V28.6877C99.505 26.2017 99.4387 23.8807 99.2618 21.7027C93.0151 14.7837 87.0006 8.72266 81.2182 8.72266C74.3966 8.72266 66.4583 17.3357 58.509 25.9487C50.5596 34.5617 42.6213 43.1747 35.7997 43.1747C30.3933 43.1747 24.9315 37.8507 17.6234 32.5157C12.7809 28.9737 7.10908 25.4317 0.121617 23.4627C0.0331683 25.0357 0 26.6857 0 28.4017V30.2277L35.7997 49.5107V49.4997Z" fill="#000B1C"/><path d="M19.2045 51.4805C19.2045 51.4805 0 70.3015 0 70.2245V70.3125C0 72.5895 0.0552806 74.7345 0.19901 76.7475C1.73581 75.2515 3.20627 73.4365 4.76519 71.6215C8.46898 67.3205 12.6482 63.0085 19.2045 63.0085C27.3749 63.0085 33.9091 69.9715 39.5698 76.9235C45.2306 83.8865 50.0179 90.8385 54.7167 90.8385C59.4156 90.8385 63.0199 83.3915 69.2223 75.9445C75.4027 68.5415 84.2144 61.1385 99.505 61.0505V58.3445L19.2045 51.4805Z" fill="#000B1C"/><path d="M35.8 49.929L99.5053 39.721V29.15C93.1812 23.892 87.0783 19.25 81.2185 19.25C74.3969 19.25 66.4586 25.685 58.5093 32.12C50.5599 38.555 42.6216 44.99 35.8 44.99C30.3936 44.99 24.9319 41.008 17.6238 37.026C12.748 34.364 7.04306 31.702 -0.0107422 30.228V40.26L35.789 49.929H35.8Z" fill="#0062FF"/><path d="M19.2045 59.8063C27.3749 59.8063 33.9091 65.0093 39.5698 70.2123C45.2306 75.4153 50.0179 80.6183 54.7167 80.6183C59.4156 80.6183 63.0199 75.0523 69.2223 69.4863C75.4027 63.9533 84.2144 58.4093 99.505 58.3543V54.3613H6.68895L0 60.3123V70.2233C1.60314 69.0793 3.13994 67.6603 4.76519 66.2523C8.46898 63.0293 12.6482 59.8173 19.2045 59.8173V59.8063Z" fill="#0062FF"/><path d="M19.2048 55.087C27.3753 55.087 33.9094 57.694 39.5701 60.301C45.2309 62.908 50.0182 65.515 54.717 65.515C59.4159 65.515 63.0202 62.721 69.2226 59.927C75.403 57.155 84.2147 54.372 99.5053 54.35V39.709C93.1812 37.069 87.0783 34.748 81.2185 34.748C74.3969 34.748 66.4586 37.971 58.5093 41.205C50.5599 44.428 42.6216 47.662 35.8 47.662C30.3936 47.662 24.9319 45.66 17.6238 43.669C12.748 42.338 7.04306 40.996 -0.0107422 40.259V60.312C1.59239 59.74 3.12919 59.025 4.75444 58.321C8.45824 56.704 12.6375 55.098 19.1937 55.098L19.2048 55.087Z" fill="white"/></svg></a>
+        <button class="icon-btn" id="closeBtn" aria-label="Cancel generation"><svg class="ico" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </header>
+
+      <section class="intro reveal" style="--d:1">
+        <h1 id="title">Creating<br>your track<span class="dots"><i>.</i><i>.</i><i>.</i></span></h1>
+        <p id="sub">Our AI is composing a unique song based on your ideas</p>
+      </section>
+
+      <section class="viz reveal" style="--d:2" id="viz">
+        <canvas id="cv" aria-hidden="true"></canvas>
+        <div class="pct" id="pctBox"><b><i id="pct">0</i><small>%</small></b><span id="pctLabel">Analyzing</span></div>
+      </section>
+
+      <div class="meta" id="meta"></div>
+
+      <section class="bottom reveal" style="--d:3">
+        <div class="waves" aria-hidden="true"><svg id="bandWaves"></svg></div>
+        <div class="steps">
+          <div class="bar"><i id="bar"></i></div>
+          <div class="step" data-at="22"><span class="st"><svg viewBox="0 0 16 16"><path d="M3.5 8.4l3 3 6-6.4"/></svg></span>Analyzing your prompt<small></small></div>
+          <div class="step" data-at="55"><span class="st"><svg viewBox="0 0 16 16"><path d="M3.5 8.4l3 3 6-6.4"/></svg></span>Composing melody<small></small></div>
+          <div class="step" data-at="85"><span class="st"><svg viewBox="0 0 16 16"><path d="M3.5 8.4l3 3 6-6.4"/></svg></span>Adding instruments<small></small></div>
+          <div class="step" data-at="100"><span class="st"><svg viewBox="0 0 16 16"><path d="M3.5 8.4l3 3 6-6.4"/></svg></span>Finalizing your track<small></small></div>
+        </div>
+      </section>
+
+      <div class="toast" id="toast"><i></i><span></span></div>
+    </div>
+    <div class="homebar"></div>
+  </div></div></div>
+
+  <div class="toolbar" aria-label="Prototype controls">
+    <a href="index.html"><span class="n">01</span>Prompt</a>
+    <a href="generating.html" class="on"><span class="n">02</span>Generate</a>
+    <a href="player.html"><span class="n">03</span>Play</a>
+    <span class="sep"></span>
+    <button id="restartBtn"><svg class="ico" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>Restart demo</button>
+    <button id="fsBtn"><svg class="ico" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>Fullscreen</button>
+  </div>
+</div>
+
+<script>
+/* ───────── Shared helpers ───────── */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const store={get(k,d){try{const v=sessionStorage.getItem('riitm:'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+             set(k,v){try{sessionStorage.setItem('riitm:'+k,JSON.stringify(v))}catch(e){}}};
+const params=new URLSearchParams(location.search);
+function go(url){document.body.classList.add('leaving');setTimeout(()=>{location.href=url},400)}
+addEventListener('pageshow',e=>{if(e.persisted)location.reload()});
+let toastT;function toast(msg){const t=$('#toast');$('span',t).textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2400)}
+function fit(){const w=$('#wrap'),d=$('#device');
+  if(matchMedia('(max-width:520px)').matches){w.style.width=w.style.height='';d.style.removeProperty('--scale');return}
+  const s=Math.min(1,(innerHeight-96)/864,(innerWidth-32)/410);d.style.setProperty('--scale',s);w.style.width=410*s+'px';w.style.height=864*s+'px'}
+addEventListener('resize',fit);fit();
+function makeWaves(svg,w,h,bg,layers){
+  svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('preserveAspectRatio','xMidYMid slice');
+  let out=bg?`<rect width="${w}" height="${h}" fill="${bg}"/>`:'';
+  for(const L of layers){const P=L.period||w,step=P/48;let d=`M0 ${h+10}`;
+    for(let x=0;x<=w+P+0.1;x+=step){const y=L.y+L.amp*Math.sin(2*Math.PI*x/P+(L.ph||0))+(L.amp2||0)*Math.sin(4*Math.PI*x/P+(L.ph||0)*1.7);d+=`L${x.toFixed(1)} ${y.toFixed(1)}`}
+    out+=`<path d="${d}L${(w+P).toFixed(1)} ${h+10}Z" fill="${L.c}" style="--p:${-P}px;animation:waveSlide ${L.dur||10}s linear infinite${L.rev?' reverse':''}"/>`}
+  svg.innerHTML=out}
+makeWaves($('#bgWaves'),1600,1000,'#0062FF',[
+  {y:120,amp:90,amp2:30,c:'#9DFF00',period:1600,dur:40,ph:.4},{y:300,amp:110,amp2:25,c:'#000B1C',period:1600,dur:46,rev:1,ph:2},
+  {y:360,amp:110,amp2:25,c:'#0062FF',period:1600,dur:46,rev:1,ph:2},{y:560,amp:120,amp2:40,c:'#9DFF00',period:1600,dur:38,ph:4},
+  {y:640,amp:120,amp2:40,c:'#000B1C',period:1600,dur:38,ph:4.2},{y:820,amp:90,amp2:20,c:'#0062FF',period:1600,dur:50,rev:1,ph:1}]);
+$('#fsBtn').onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}};
+$('#restartBtn').onclick=()=>{try{sessionStorage.clear()}catch(e){}go('index.html')};
+(function clock(){const c=$('#clock');if(!c)return;const tick=()=>{const d=new Date();c.textContent=(d.getHours()%12||12)+':'+String(d.getMinutes()).padStart(2,'0')};tick();setInterval(tick,15000)})();
+
+/* ───────── Page 2 ───────── */
+makeWaves($('#bandWaves'),390,150,null,[
+  {y:46,amp:14,amp2:6,c:'#9DFF00',period:390,dur:9,ph:.3},
+  {y:62,amp:16,amp2:5,c:'#0062FF',period:390,dur:12,rev:1,ph:1.6},
+  {y:84,amp:14,amp2:6,c:'#000B1C',period:390,dur:8,ph:2.6},
+  {y:92,amp:14,amp2:6,c:'#0B0C10',period:390,dur:8,ph:2.6}]);
+
+const mood=params.get('mood')||store.get('mood','Chill'),genre=params.get('genre')||store.get('genre','EDM'),dur=params.get('dur')||store.get('duration','1 min');
+const variation=params.get('variation')==='1';
+store.set('mood',mood);store.set('genre',genre);store.set('duration',dur);
+const prompt=store.get('prompt','A chill electronic song about feeling free and enjoying the night');
+if(variation){$('#title').innerHTML='Creating a<br>variation<span class="dots"><i>.</i><i>.</i><i>.</i></span>';$('#sub').textContent='Same vibe, new ideas — reimagining “Midnight Freedom”'}
+
+const stepEls=$$('.step');
+const stepMeta=[`${mood} · ${genre}`,'A minor · 112 BPM','Synths, drums, bass','Mixing & mastering'];
+const stepLabel=['Analyzing','Composing','Arranging','Mastering'];
+const tags=[[0,`<em>●</em> ${mood}`],[8,genre],[16,dur],[30,'A minor'],[42,'112 BPM']];
+
+const meta=$('#meta');
+tags.forEach(([,html])=>{const s=document.createElement('span');s.className='tag';s.innerHTML=html;meta.appendChild(s)});
+const tagEls=$$('.tag',meta);
+
+/* Natural-feeling progress curve: [seconds, percent] */
+const KF=[[0,0],[.6,3],[1.3,11],[2.1,22],[2.6,26],[3.5,38],[4.2,49],[4.7,55],[5.4,60],[6.2,71],[6.9,80],[7.3,85],[7.9,91],[8.5,96],[8.9,98],[9.3,100]];
+const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+function pctAt(s){for(let i=1;i<KF.length;i++){if(s<=KF[i][0]){const[a,pa]=KF[i-1],[b,pb]=KF[i];return pa+(pb-pa)*ease((s-a)/(b-a))}}return 100}
+
+const cv=$('#cv'),ctx=cv.getContext('2d'),vizBox=$('#viz');
+let S=300,DPR=Math.min(2,devicePixelRatio||1);
+function size(){const r=vizBox.getBoundingClientRect(),k=r.width/vizBox.offsetWidth||1;
+  S=Math.max(180,Math.min(320,vizBox.offsetWidth-30,vizBox.offsetHeight+30));
+  cv.style.width=cv.style.height=S+'px';cv.width=cv.height=Math.round(S*DPR*Math.max(1,k))}
+new ResizeObserver(size).observe(vizBox);size();
+
+const pctEl=$('#pct'),pctLabel=$('#pctLabel'),bar=$('#bar');
+let start=null,last=-1,energy=0,finished=false,burst=0;
+const hasConic=typeof ctx.createConicGradient==='function';
+
+function draw(t,p){
+  const W=cv.width,c=W/2,u=W/300;ctx.clearRect(0,0,W,W);
+  const pulse=1+Math.sin(t*2.4)*.025+energy*.05+burst*.25;
+  const R=64*u*pulse;
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  let grad;
+  if(hasConic){grad=ctx.createConicGradient(t*.35,c,c);grad.addColorStop(0,'#B6FF38');grad.addColorStop(.3,'#0062FF');grad.addColorStop(.55,'#2A7BFF');grad.addColorStop(.78,'#B6FF38');grad.addColorStop(1,'#B6FF38')}
+  else{grad=ctx.createLinearGradient(0,0,W,W);grad.addColorStop(0,'#B6FF38');grad.addColorStop(1,'#0062FF')}
+  ctx.strokeStyle=grad;
+  const N=34,steps=140,amp=(9+energy*10+burst*20)*u;
+  for(let i=0;i<N;i++){
+    const f=i/(N-1);ctx.globalAlpha=(.08+.55*Math.pow(Math.sin(f*Math.PI),1.4))*(1-burst*.5);
+    ctx.lineWidth=(f>.42&&f<.58?1.6:1)*u;
+    ctx.beginPath();
+    for(let k=0;k<=steps;k++){
+      const a=k/steps*Math.PI*2;
+      const r=R+f*44*u+amp*(Math.sin(5*a+t*1.1+f*2.6)*.75+Math.sin(3*a-t*.7+f*4)*.35+Math.sin(8*a+t*1.9)*.12*energy);
+      const x=c+Math.cos(a)*r,y=c+Math.sin(a)*r;k?ctx.lineTo(x,y):ctx.moveTo(x,y)}
+    ctx.closePath();ctx.stroke()}
+  ctx.restore();
+  // inner disc
+  const g2=ctx.createRadialGradient(c,c,0,c,c,R*1.05);g2.addColorStop(0,'#0B0C10');g2.addColorStop(.82,'#0B0C10');g2.addColorStop(1,'rgba(11,12,16,0)');
+  ctx.fillStyle=g2;ctx.beginPath();ctx.arc(c,c,R*1.05,0,Math.PI*2);ctx.fill();
+  // progress arc
+  ctx.lineCap='round';ctx.lineWidth=2.2*u;ctx.strokeStyle='rgba(255,255,255,.07)';ctx.beginPath();ctx.arc(c,c,R*.88,0,Math.PI*2);ctx.stroke();
+  ctx.strokeStyle='#B6FF38';ctx.shadowColor='#B6FF38';ctx.shadowBlur=12*u;ctx.beginPath();ctx.arc(c,c,R*.88,-Math.PI/2,-Math.PI/2+Math.PI*2*p/100);ctx.stroke();ctx.shadowBlur=0;
+  // orbiting particles
+  for(let i=0;i<10;i++){const a=t*(.25+i*.04)+i*2.1,rr=R+(30+((i*37)%40))*u+Math.sin(t+i)*6*u;
+    ctx.globalAlpha=.35+.35*Math.sin(t*2+i);ctx.fillStyle=i%3?'#B6FF38':'#5B9BFF';ctx.beginPath();ctx.arc(c+Math.cos(a)*rr,c+Math.sin(a)*rr,(1+(i%3)*.6)*u,0,Math.PI*2);ctx.fill()}
+  ctx.globalAlpha=1}
+
+function setSteps(p){
+  let activeIdx=stepEls.findIndex(s=>p<+s.dataset.at);if(p>=100)activeIdx=-1;
+  stepEls.forEach((s,i)=>{const done=p>=+s.dataset.at,active=i===activeIdx;
+    s.classList.toggle('done',done);s.classList.toggle('active',active);
+    if(done||active)$('small',s).textContent=done?stepMeta[i]:'Working…'});
+  if(activeIdx>=0)pctLabel.textContent=stepLabel[activeIdx];
+  tagEls.forEach((el,i)=>el.classList.toggle('in',p>=tags[i][0]))}
+
+function frame(now){
+  if(start==null)start=now;
+  const s=(now-start)/1000-.55,t=now/1000;
+  const p=finished?100:Math.max(0,Math.min(100,pctAt(Math.max(0,s))));
+  const target=p>=22&&p<85?1:p<22?.4:.6;energy+=(target-energy)*.03;
+  if(finished)burst=Math.min(.6,burst+.015);
+  draw(t,p);
+  const n=Math.floor(p);
+  if(n!==last){last=n;pctEl.textContent=n;bar.style.width=p+'%';setSteps(p)}
+  if(p>=100&&!finished){finished=true;complete()}
+  requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+
+function complete(){
+  $('#pctBox').classList.add('pop');pctLabel.textContent='Ready';
+  const h=$('#title');h.classList.add('done');h.innerHTML=variation?'Variation<br>is ready':'Your track<br>is ready';
+  $('#sub').textContent=`“${prompt.length>60?prompt.slice(0,58)+'…':prompt}”`;
+  setTimeout(()=>go('player.html'+(variation?'?variation=1':'')),1500)}
+
+$('#closeBtn').onclick=()=>go('index.html?demo=0');
+</script>
+</body>
+</html>
