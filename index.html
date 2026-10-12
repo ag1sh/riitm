@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0B0C10">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Riitm">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
 <title>Riitm — Create</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -142,6 +148,27 @@ body.leaving .app{animation:leave .42s var(--ease) forwards}
 .tab.on .ti{color:var(--lime);background:radial-gradient(circle,rgba(182,255,56,.18),rgba(182,255,56,.04) 70%);box-shadow:0 0 22px rgba(182,255,56,.25)}
 .tab:not(.on):hover{color:var(--text)}
 @media (max-width:520px){.tabbar{padding-bottom:max(12px,env(safe-area-inset-bottom))}}
+
+/* ───────── Mobile: tap-to-start splash + fullscreen shell ───────── */
+.splash{display:none}
+@media (max-width:520px){
+  .splash{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 24px 120px;text-align:center;
+    background:var(--bg);overflow:hidden;cursor:pointer;transition:opacity .5s,transform .6s var(--ease)}
+  .splash[hidden]{display:none}
+}
+.splash.gone{opacity:0;transform:scale(1.04);pointer-events:none}
+.splash .s-logo svg{height:30px;width:auto}
+.splash h2{margin-top:34px;font:800 34px/1.04 var(--fd);font-stretch:112%;letter-spacing:-.015em}
+.splash h2 em{font-style:normal;color:var(--lime)}
+.splash p{margin-top:12px;font:400 15px var(--fb);color:#AEB4BF}
+.splash .s-btn{margin-top:34px;display:inline-flex;align-items:center;gap:10px;height:58px;padding:0 30px;border-radius:999px;background:var(--lime);color:#0B0C10;font:600 17px var(--fb);
+  box-shadow:0 14px 40px -12px rgba(182,255,56,.7);animation:breathe 2.2s ease-in-out infinite}
+.splash .s-btn svg{width:18px;height:18px;fill:#0B0C10}
+@keyframes breathe{50%{box-shadow:0 0 0 12px rgba(182,255,56,.08),0 14px 40px -12px rgba(182,255,56,.9)}}
+.splash small{margin-top:16px;font:500 12px var(--fb);color:var(--dim);max-width:260px;line-height:1.5}
+.splash .s-waves{position:absolute;left:0;right:0;bottom:0;height:150px}
+.splash .s-waves svg{width:100%;height:100%}
+.shell{position:fixed;inset:0;width:100%;height:100%;border:0;z-index:90;background:#0B0C10}
 </style>
 </head>
 <body>
@@ -210,6 +237,15 @@ body.leaving .app{animation:leave .42s var(--ease) forwards}
     </div>
     <div class="homebar"></div>
   </div></div></div>
+
+  <button class="splash" id="splash" hidden aria-label="Tap to start the Riitm demo">
+    <span class="s-logo" id="splashLogo"></span>
+    <h2>Music generation<br><em>with AI</em></h2>
+    <p>Turn your ideas into unique songs</p>
+    <span class="s-btn"><svg viewBox="0 0 24 24"><path d="M7 5.3v13.4a1 1 0 0 0 1.5.9l10.9-6.7a1 1 0 0 0 0-1.8L8.5 4.4A1 1 0 0 0 7 5.3z"/></svg>Tap to start</span>
+    <small id="splashHint">Opens full screen · sound on</small>
+    <span class="s-waves" aria-hidden="true"><svg id="splashWaves"></svg></span>
+  </button>
 
   <div class="toolbar" aria-label="Prototype controls">
     <a href="index.html" class="on"><span class="n">01</span>Prompt</a>
@@ -323,7 +359,33 @@ if(isRemix||params.get('demo')==='0'){
   select('mood',store.get('mood','Chill'));select('genre',store.get('genre','EDM'));select('duration',store.get('duration','1 min'));
   updateCount();
   if(isRemix){ta.value=ta.value.replace(/\s*—\s*remix.*$/i,'')+' — remix with a deeper bassline and a faster tempo';updateCount();setTimeout(()=>toast('Remixing “Midnight Freedom” — tweak and generate'),700)}
+}else if(matchMedia('(max-width:520px)').matches&&window.self===window.top&&
+  !(matchMedia('(display-mode: fullscreen),(display-mode: standalone)').matches||navigator.standalone===true)){
+  showSplash();
 }else{runDemo()}
+
+/* On phones the first tap enters fullscreen. The flow then runs inside a full-screen frame,
+   so moving between the three pages doesn't drop out of fullscreen. */
+function showSplash(){
+  const splash=$('#splash');splash.hidden=false;
+  $('#splashLogo').innerHTML=$('.logo').innerHTML;
+  makeWaves($('#splashWaves'),390,150,null,[
+    {y:56,amp:14,amp2:6,c:'#9DFF00',period:390,dur:9,ph:.3},{y:72,amp:16,amp2:5,c:'#0062FF',period:390,dur:12,rev:1,ph:1.6},
+    {y:96,amp:14,amp2:6,c:'#000B1C',period:390,dur:8,ph:2.6},{y:104,amp:14,amp2:6,c:'#0B0C10',period:390,dur:8,ph:2.6}]);
+  const el=document.documentElement,request=el.requestFullscreen||el.webkitRequestFullscreen;
+  if(!request)$('#splashHint').textContent='Tip: Share → Add to Home Screen to run it full screen';
+  splash.addEventListener('click',async()=>{
+    let full=false;
+    if(request){try{await Promise.race([request.call(el,{navigationUI:'hide'}),new Promise(r=>setTimeout(r,800))])}catch(e){}full=!!(document.fullscreenElement||document.webkitFullscreenElement)}
+    try{screen.orientation.lock('portrait').catch(()=>{})}catch(e){}
+    if(full){
+      const f=document.createElement('iframe');f.className='shell';f.allow='autoplay; fullscreen';f.title='Riitm';
+      f.src='index.html?embed=1';
+      f.onload=()=>{splash.classList.add('gone');const st=$('.stage');if(st)st.style.display='none';setTimeout(()=>splash.remove(),600)};
+      document.body.appendChild(f);
+    }else{splash.classList.add('gone');setTimeout(()=>splash.remove(),600);runDemo()}
+  },{once:true});
+}
 </script>
 </body>
 </html>
