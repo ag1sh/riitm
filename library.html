@@ -53,7 +53,7 @@ svg{display:block}
 .icon-btn:active{transform:scale(.92)}
 .icon-btn svg{width:19px;height:19px}
 .ico{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.toolbar{position:relative;z-index:2;display:flex;align-items:center;gap:4px;padding:5px;border-radius:999px;background:rgba(11,12,16,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line)}
+.toolbar{position:relative;z-index:2;display:flex;align-items:center;gap:4px;max-width:calc(100vw - 24px);overflow-x:auto;scrollbar-width:none;padding:5px;border-radius:999px;background:rgba(11,12,16,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line)}
 .toolbar a,.toolbar button{height:34px;padding:0 14px;border-radius:999px;display:inline-flex;align-items:center;gap:7px;font:500 12.5px var(--fb);color:var(--muted);text-decoration:none;transition:color .2s,background .2s;white-space:nowrap}
 .toolbar a:hover,.toolbar button:hover{color:var(--text);background:rgba(255,255,255,.06)}
 .toolbar a.on{background:var(--lime);color:#0B0C10}
@@ -248,7 +248,9 @@ body.leaving .app{animation:leave .42s var(--ease) forwards}
   </div></div></div>
 
   <div class="toolbar" aria-label="Prototype controls">
-    <a href="index.html"><span class="n">01</span>Home</a>
+    <a href="index.html" class="demos"><svg class="ico" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>Demos</a>
+    <span class="sep"></span>
+    <a href="home.html?flow=create"><span class="n">01</span>Home</a>
     <a href="create.html"><span class="n">02</span>Idea</a>
     <a href="generating.html"><span class="n">03</span>Generate</a>
     <a href="player.html"><span class="n">04</span>Track</a>
@@ -289,7 +291,8 @@ makeWaves($('#bgWaves'),1600,1000,'#0062FF',[
   {y:360,amp:110,amp2:25,c:'#0062FF',period:1600,dur:46,rev:1,ph:2},{y:560,amp:120,amp2:40,c:'#9DFF00',period:1600,dur:38,ph:4},
   {y:640,amp:120,amp2:40,c:'#000B1C',period:1600,dur:38,ph:4.2},{y:820,amp:90,amp2:20,c:'#0062FF',period:1600,dur:50,rev:1,ph:1}]);
 $('#fsBtn').onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}};
-$('#restartBtn').onclick=()=>{try{sessionStorage.clear()}catch(e){}go('index.html')};
+// Restart replays the current feature's flow from its home screen (index.html is the demo selector)
+const rsb=$('#restartBtn');if(rsb)rsb.onclick=()=>{const f=store.get('flow','create');try{sessionStorage.clear()}catch(e){}go('home.html?flow='+f)};
 (function clock(){const c=$('#clock');if(!c)return;const tick=()=>{const d=new Date();c.textContent=(d.getHours()%12||12)+':'+String(d.getMinutes()).padStart(2,'0')};tick();setInterval(tick,15000)})();
 
 /* ───────── This page ───────── */
@@ -467,9 +470,9 @@ $$('#options .s-row').forEach(r=>r.onclick=()=>{const o=r.dataset.o;
 function saveRename(){const v=$('#renameIn').value.trim();if(!v)return;tracks[optIdx].title=v;store.set('tracks',tracks);if(+optIdx===0)store.set('title',v);Sheet.close();renderAI();toast('Renamed to “'+v+'”')}
 $('#renameSave').onclick=saveRename;$('#renameIn').addEventListener('keydown',e=>{if(e.key==='Enter')saveRename()});
 
-$('#backBtn').onclick=()=>go(document.referrer.includes('player')?'player.html':'index.html?demo=0');
+$('#backBtn').onclick=()=>go(document.referrer.includes('player')?'player.html':'home.html?demo=0');
 $('#searchBtn').onclick=()=>toast('Search My Music');
-$$('.tab').forEach(t=>t.onclick=()=>{const n=t.dataset.tab;if(n==='Home')go('index.html?demo=0');else if(n!=='Library')toast(`${n} isn’t part of this prototype`)});
+$$('.tab').forEach(t=>t.onclick=()=>{const n=t.dataset.tab;if(n==='Home')go('home.html?demo=0');else if(n==='Search')go('search.html?demo=0');else if(n!=='Library')toast(`${n} isn’t part of this prototype`)});
 
 const del=store.get('deleted',null);if(del){store.set('deleted',null);setTimeout(()=>toast(`Deleted “${del}”`),500)}
 if(Demo.active()){

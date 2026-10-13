@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-title" content="Riitm">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
-<title>riitm — Home</title>
+<title>riitm — Demos</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -53,7 +53,7 @@ svg{display:block}
 .icon-btn:active{transform:scale(.92)}
 .icon-btn svg{width:19px;height:19px}
 .ico{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.toolbar{position:relative;z-index:2;display:flex;align-items:center;gap:4px;padding:5px;border-radius:999px;background:rgba(11,12,16,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line)}
+.toolbar{position:relative;z-index:2;display:flex;align-items:center;gap:4px;max-width:calc(100vw - 24px);overflow-x:auto;scrollbar-width:none;padding:5px;border-radius:999px;background:rgba(11,12,16,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line)}
 .toolbar a,.toolbar button{height:34px;padding:0 14px;border-radius:999px;display:inline-flex;align-items:center;gap:7px;font:500 12.5px var(--fb);color:var(--muted);text-decoration:none;transition:color .2s,background .2s;white-space:nowrap}
 .toolbar a:hover,.toolbar button:hover{color:var(--text);background:rgba(255,255,255,.06)}
 .toolbar a.on{background:var(--lime);color:#0B0C10}
@@ -153,77 +153,67 @@ body.leaving .app{animation:leave .42s var(--ease) forwards}
 .field-in{width:100%;height:50px;padding:0 16px;border-radius:14px;background:var(--field);border:1px solid var(--line-2);color:var(--text);font:500 15.5px var(--fb);outline:0}
 .field-in:focus{border-color:rgba(182,255,56,.55);box-shadow:0 0 0 4px rgba(182,255,56,.08)}
 
-.hdr.bar .logo,.hdr.bar .logo svg{height:24px}
-.banner{position:relative;height:104px;margin:2px 0 0;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
-.banner svg{width:100%;height:100%}
-.banner.paused path{animation-play-state:paused}
-.mix{display:flex;justify-content:center;align-items:center;gap:12px;margin-top:12px}
-.mix-pill{position:relative;overflow:hidden;display:flex;align-items:center;gap:12px;height:50px;padding:0 26px 0 6px;border-radius:999px;background:var(--lime);color:#0B0C10;font:700 16px var(--fb);
-  box-shadow:0 10px 30px -10px rgba(182,255,56,.7);transition:transform .2s var(--ease)}
-.mix-pill:active{transform:scale(.95)}
-.mix-pill .pp{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#0B0C10;color:var(--lime)}
-.mix-pill .pp svg{width:16px;height:16px;fill:currentColor}
-.mix-pill .i-play{display:none}.mix-pill.paused .i-play{display:block}.mix-pill.paused .i-pause{display:none}
-.mix .icon-btn{width:48px;height:48px}
-.mix-cap{margin-top:10px;text-align:center;font:400 13.5px var(--fb);color:#AEB4BF}
+/* Mini player above the tab bar (home + search) */
+.mini{flex:none;position:relative;z-index:6;display:flex;align-items:center;gap:8px;height:58px;padding:0 10px 0 10px;background:#111318;border-top:1px solid var(--line)}
+.mini-prog{position:absolute;left:0;top:-1px;height:2px;width:0;background:var(--lime);box-shadow:0 0 8px rgba(182,255,56,.7);transition:width .25s linear}
+.mini-like{width:40px;height:40px;display:grid;place-items:center;flex:none;color:#C9CED6;transition:transform .2s var(--ease),color .2s}
+.mini-like svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
+.mini-like.on{color:#FF3D57}.mini-like.on svg{fill:currentColor}
+.mini-like:active{transform:scale(.82)}
+.mini-txt{flex:1;min-width:0;text-align:left}
+.mini-txt b{display:block;font:600 14px var(--fb);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini-txt small{display:block;margin-top:2px;font:400 12px var(--fb);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini.swap .mini-txt{animation:miniIn .5s var(--ease)}
+@keyframes miniIn{from{opacity:0;transform:translateY(8px)}}
+.mini-pp{width:44px;height:44px;display:grid;place-items:center;border-radius:50%;flex:none;transition:transform .2s var(--ease),background .2s}
+.mini-pp:hover{background:rgba(255,255,255,.07)}
+.mini-pp:active{transform:scale(.88)}
+.mini-pp svg{width:22px;height:22px;fill:#fff}
+.mini-pp .i-pause,.mini.playing .mini-pp .i-play{display:none}
+.mini.playing .mini-pp .i-pause{display:block}
+.toast{bottom:150px}
 
-.ai-card{position:relative;overflow:hidden;margin:18px 14px 0;height:198px;padding:20px 18px;border-radius:24px;
-  background:radial-gradient(120% 140% at 85% 20%,#1a5bff 0%,#0b2f8f 40%,#08174a 75%,#060d2b 100%);border:1px solid rgba(182,255,56,.35);
-  box-shadow:0 20px 50px -24px rgba(0,98,255,.8);transition:box-shadow .4s,transform .3s var(--ease)}
-.ai-card.glow{box-shadow:0 0 0 3px rgba(182,255,56,.25),0 20px 60px -16px rgba(182,255,56,.45)}
-.ai-card h2{position:relative;z-index:2;font:800 23px/1.08 var(--fd);font-stretch:108%;letter-spacing:-.01em}
-.ai-card h2 em{font-style:normal;color:var(--lime)}
-.ai-card p{position:relative;z-index:2;margin-top:8px;max-width:190px;font:400 12.5px/1.4 var(--fb);color:#C9D3F0}
-.ai-card .cta{position:absolute;left:18px;bottom:18px;z-index:2;overflow:hidden;display:flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:999px;background:var(--lime);color:#0B0C10;font:600 14px var(--fb);
-  box-shadow:0 8px 24px -8px rgba(182,255,56,.8);transition:transform .2s var(--ease)}
-.ai-card .cta:active{transform:scale(.94)}
-.ai-card .cta svg{width:17px;height:17px}
-.ai-art{position:absolute;right:-6px;top:16px;width:170px;height:170px;z-index:1;pointer-events:none}
-.ai-art .w{position:absolute;left:-30px;right:-20px;top:52px;height:90px;opacity:.9;-webkit-mask-image:linear-gradient(90deg,transparent,#000 30%);mask-image:linear-gradient(90deg,transparent,#000 30%)}
-.ai-art .w svg{width:100%;height:100%}
-.ai-art .phone{position:absolute;left:44px;top:14px;width:92px;height:140px;border-radius:20px;transform:rotate(-12deg);
+
+/* ───── Demo selector ───── */
+.hdr.bar .logo,.hdr.bar .logo svg{height:24px}
+.pick{padding:6px 16px 24px}
+.pick-h{padding:8px 6px 0}
+.pick-h h1{font:800 31px/1.06 var(--fd);font-stretch:112%;letter-spacing:-.015em}
+.pick-h h1 em{font-style:normal;color:var(--lime)}
+.pick-h p{margin-top:10px;font:400 14.5px/1.45 var(--fb);color:#AEB4BF;max-width:300px}
+.demo-card{position:relative;overflow:hidden;display:block;width:100%;height:258px;margin-top:16px;padding:20px 18px;border-radius:26px;text-align:left;
+  border:1px solid var(--line-2);transition:transform .3s var(--ease),box-shadow .4s,border-color .4s}
+.demo-card:hover{border-color:rgba(182,255,56,.55);box-shadow:0 0 0 3px rgba(182,255,56,.12),0 24px 60px -24px rgba(182,255,56,.45)}
+.demo-card:active{transform:scale(.975)}
+.dc-gen{background:radial-gradient(120% 140% at 85% 20%,#1a5bff 0%,#0b2f8f 40%,#08174a 75%,#060d2b 100%);margin-top:22px}
+.dc-search{background:radial-gradient(110% 120% at 80% 40%,#1c2a10 0%,#121611 45%,#0E1013 100%)}
+.dc-k{position:relative;z-index:2;display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 11px;border-radius:13px;background:rgba(11,12,16,.45);border:1px solid rgba(255,255,255,.14);font:600 11px var(--fb);letter-spacing:.06em;text-transform:uppercase;color:#DDE3EE}
+.dc-k i{width:6px;height:6px;border-radius:50%;background:var(--lime);box-shadow:0 0 8px var(--lime)}
+.demo-card h2{position:relative;z-index:2;margin-top:14px;font:800 24px/1.06 var(--fd);font-stretch:110%;letter-spacing:-.01em}
+.demo-card h2 em{font-style:normal;color:var(--lime)}
+.demo-card p{position:relative;z-index:2;margin-top:8px;max-width:180px;font:400 12.5px/1.42 var(--fb);color:#C3CAD8}
+.dc-go{position:absolute;left:18px;bottom:18px;z-index:2;overflow:hidden;display:flex;align-items:center;gap:8px;height:42px;padding:0 18px;border-radius:999px;background:var(--lime);color:#0B0C10;font:600 14px var(--fb);box-shadow:0 8px 24px -8px rgba(182,255,56,.8)}
+.dc-go svg{width:17px;height:17px}
+.dc-art{position:absolute;right:-8px;top:34px;width:178px;height:178px;z-index:1;pointer-events:none}
+.dc-gen .dc-art{top:40px}
+.dc-gen .dc-art .w{position:absolute;left:-40px;right:-10px;top:54px;height:84px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 35%);mask-image:linear-gradient(90deg,transparent,#000 35%)}
+.dc-gen .dc-art .w svg{width:100%;height:100%}
+.dc-gen .note{position:absolute;left:52px;top:18px;width:86px;height:132px;border-radius:20px;transform:rotate(-10deg);
   background:linear-gradient(160deg,rgba(255,255,255,.28),rgba(255,255,255,.06));border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
   box-shadow:0 20px 40px -10px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.4);animation:hover 5s ease-in-out infinite}
-@keyframes hover{50%{transform:rotate(-9deg) translateY(-6px)}}
-.ai-art .phone b{position:absolute;left:0;right:0;top:30px;text-align:center;font:800 26px var(--fd);font-stretch:115%;color:#fff;text-shadow:0 0 18px rgba(182,255,56,.8)}
-.ai-art .bars{position:absolute;left:14px;right:14px;bottom:22px;height:38px;display:flex;align-items:center;justify-content:space-between}
-.ai-art .bars i{width:3px;border-radius:2px;background:var(--lime);height:10px;animation:bar 1s ease-in-out infinite}
-.ai-art .bars i:nth-child(3n){background:#7FB3FF}
-@keyframes bar{0%,100%{height:6px}50%{height:34px}}
-.spk{position:absolute;color:var(--lime);animation:twinkle 2.4s ease-in-out infinite}
-.spk svg{width:100%;height:100%;fill:currentColor}
-@keyframes twinkle{0%,100%{opacity:.25;transform:scale(.6)}50%{opacity:1;transform:scale(1)}}
-
-.sec-h{display:flex;justify-content:space-between;align-items:center;margin:22px 18px 12px}
-.sec-h h3{font:700 19px var(--fb);letter-spacing:-.01em}
-.sec-h button{display:flex;align-items:center;gap:2px;font:500 13.5px var(--fb);color:#C9CED6}
-.sec-h button svg{width:16px;height:16px}
-.recs{display:flex;gap:10px;overflow-x:auto;padding:0 18px 18px;scrollbar-width:none}
-.recs::-webkit-scrollbar{display:none}
-.rec{flex:none;width:118px;text-align:left;transition:transform .2s var(--ease)}
-.rec:active{transform:scale(.95)}
-.rec .cv{width:118px;height:112px;border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.06)}
-.rec .cv svg{width:100%;height:100%}
-.rec b{display:block;margin-top:8px;font:600 13px var(--fb)}
-.rec small{display:block;margin-top:2px;font:400 11.5px var(--fb);color:var(--muted)}
-
-/* Phones: tap-to-start splash + fullscreen shell (see skill patterns §8) */
-.splash{display:none}
-@media (max-width:520px){
-  .splash{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 24px 120px;text-align:center;background:var(--bg);overflow:hidden;cursor:pointer;transition:opacity .5s,transform .6s var(--ease)}
-  .splash[hidden]{display:none}
-}
-.splash.gone{opacity:0;transform:scale(1.04);pointer-events:none}
-.splash .s-logo svg{height:30px;width:auto}
-.splash h2{margin-top:34px;font:800 32px/1.06 var(--fd);font-stretch:112%;letter-spacing:-.015em}
-.splash h2 em{font-style:normal;color:var(--lime)}
-.splash p{margin-top:12px;font:400 15px var(--fb);color:#AEB4BF}
-.splash .s-btn{margin-top:34px;display:inline-flex;align-items:center;gap:10px;height:58px;padding:0 30px;border-radius:999px;background:var(--lime);color:#0B0C10;font:600 17px var(--fb);box-shadow:0 14px 40px -12px rgba(182,255,56,.7);animation:breathe 2.2s ease-in-out infinite}
-.splash .s-btn svg{width:18px;height:18px;fill:#0B0C10}
-@keyframes breathe{50%{box-shadow:0 0 0 12px rgba(182,255,56,.08),0 14px 40px -12px rgba(182,255,56,.9)}}
-.splash small{margin-top:16px;font:500 12px var(--fb);color:var(--dim);max-width:260px;line-height:1.5}
-.splash .s-waves{position:absolute;left:0;right:0;bottom:0;height:150px}
-.splash .s-waves svg{width:100%;height:100%}
+@keyframes hover{50%{transform:rotate(-7deg) translateY(-6px)}}
+.dc-gen .note b{position:absolute;left:0;right:0;top:28px;text-align:center;font:800 24px var(--fd);font-stretch:115%;color:#fff;text-shadow:0 0 18px rgba(182,255,56,.8)}
+.dc-gen .note .bars{position:absolute;left:13px;right:13px;bottom:20px;height:36px;display:flex;align-items:center;justify-content:space-between}
+.dc-gen .note .bars i{width:3px;border-radius:2px;background:var(--lime);height:10px;animation:bar 1s ease-in-out infinite}
+.dc-gen .note .bars i:nth-child(3n){background:#7FB3FF}
+@keyframes bar{0%,100%{height:6px}50%{height:32px}}
+.dc-search .dc-art{right:-34px;top:74px;width:190px;height:190px}
+.dc-search canvas{width:100%;height:100%;display:block}
+.dc-search .glass{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;display:grid;place-items:center;background:rgba(11,12,16,.6);border:1px solid rgba(182,255,56,.4);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.dc-search .glass svg{width:24px;height:24px;color:var(--lime)}
+.pick-foot{margin:18px 6px 0;font:500 12px/1.5 var(--fb);color:var(--dim);text-align:center}
+.pick-waves{flex:none;height:72px;position:relative;-webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}
+.pick-waves svg{width:100%;height:100%}
 .shell{position:fixed;inset:0;width:100%;height:100%;border:0;z-index:90;background:#0B0C10}
 
 </style>
@@ -241,42 +231,42 @@ body.leaving .app{animation:leave .42s var(--ease) forwards}
       </span></div>
 
       <header class="hdr bar reveal" style="--d:0">
-        <button class="icon-btn" id="profileBtn" aria-label="Profile"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 20.5c1.4-3.6 4.2-5.5 7.5-5.5s6.1 1.9 7.5 5.5"/></svg></button>
+        <span></span>
         <div class="mid"><a class="logo" href="index.html" aria-label="riitm"><svg viewBox="0 0 411 99" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M174.963 22.3626V31.5696H162.846C158.876 31.5696 155.372 32.2296 152.32 33.5386C149.269 34.8586 146.903 36.7176 145.211 39.1266V76.6256H134.63V22.3626H144.548L144.879 28.6106C147.301 26.5646 150.164 25.0136 153.47 23.9466C156.776 22.8906 160.369 22.3516 164.272 22.3516H174.963V22.3626Z" fill="white"/><path d="M186.871 11.671C185.544 10.395 184.892 8.734 184.892 6.688C184.892 4.642 185.555 3.113 186.871 1.859C188.197 0.616 189.922 0 192.045 0C194.168 0 195.904 0.627 197.219 1.859C198.546 3.102 199.198 4.708 199.198 6.688C199.198 8.668 198.535 10.395 197.219 11.671C195.892 12.947 194.168 13.585 192.045 13.585C189.922 13.585 188.186 12.947 186.871 11.671ZM197.341 22.363V76.637H186.76V22.363H197.341Z" fill="white"/><path d="M218.38 11.671C217.054 10.395 216.401 8.734 216.401 6.688C216.401 4.642 217.065 3.113 218.38 1.859C219.707 0.616 221.432 0 223.555 0C225.677 0 227.413 0.627 228.729 1.859C230.056 3.102 230.708 4.708 230.708 6.688C230.708 8.668 230.045 10.395 228.729 11.671C227.402 12.947 225.677 13.585 223.555 13.585C221.432 13.585 219.696 12.947 218.38 11.671ZM228.851 22.363V76.637H218.27V22.363H228.851Z" fill="white"/><path d="M270.178 31.5691V58.9811C270.178 61.6871 270.952 63.7551 272.489 65.1741C274.037 66.6041 276.193 67.3081 278.99 67.3081H291.992V76.6251H278.105C272.378 76.6251 267.879 75.0851 264.606 72.0161C261.333 68.9471 259.697 64.7121 259.697 59.3001V31.5581H239.31V22.3511H256.723C257.972 22.3511 258.813 22.1201 259.255 21.6361C259.697 21.1631 259.918 20.3381 259.918 19.1721V7.78711H270.167V22.3731H295.287V31.5801H270.167L270.178 31.5691Z" fill="white"/><path d="M403.946 28.1167C408.645 32.8357 411 39.6447 411 48.5657V76.6377H400.42V48.5657C400.42 42.7907 398.916 38.3687 395.898 35.2997C392.879 32.2307 388.59 30.6907 383.006 30.6907C378.75 30.6907 374.792 31.7137 371.165 33.7597C367.528 35.8057 364.753 38.5117 362.851 41.8777C363.216 44.2207 363.404 46.4427 363.404 48.5657V76.6377H352.934V48.5657C352.934 42.8677 351.43 38.4677 348.412 35.3547C345.393 32.2527 341.104 30.6907 335.52 30.6907C331.264 30.6907 327.361 31.6917 323.845 33.7047C320.318 35.7177 317.676 38.4017 315.907 41.7677V76.6267H305.437V22.3637H315.243L315.575 29.3817C318.217 26.6757 321.324 24.6077 324.884 23.1887C328.444 21.7587 332.325 21.0547 336.504 21.0547C341.944 21.0547 346.609 21.9897 350.501 23.8487C354.393 25.7077 357.4 28.4357 359.534 32.0217C362.398 28.5127 365.869 25.8067 369.949 23.9037C374.029 22.0007 378.562 21.0547 383.559 21.0547C392.448 21.0547 399.248 23.4087 403.946 28.1277V28.1167Z" fill="white"/><path d="M0.12207 23.463L35.8112 47.663L99.2733 21.714C98.7426 15.312 97.1948 10.23 93.2588 6.314C87.8966 1.023 80.4779 0 70.6601 0H54.5071L15.2137 1.364C11.7752 2.31 8.80112 3.861 6.30244 6.347C1.94633 10.648 0.497978 16.346 0.12207 23.463Z" fill="#9DFF00"/><path d="M17.8006 53.2844L0.199219 76.7364C0.674632 83.4024 2.17826 88.6604 6.25797 92.6864C6.88817 93.3024 7.54048 93.8634 8.22596 94.3694L33.1133 99.0004C33.1133 99.0004 73.8329 98.9674 75.3145 98.9014L99.2731 77.1874C99.45 75.0424 99.5052 72.7544 99.5052 70.3014V61.0504L17.8006 53.2734V53.2844Z" fill="#9DFF00"/><path d="M35.8002 32.373C41.472 32.373 47.9177 17.435 54.5071 0H28.5363C23.5168 0 19.0723 0.297 15.2026 1.364C16.0318 2.783 16.8389 4.224 17.6239 5.654C24.921 19.008 30.3937 32.373 35.8002 32.373Z" fill="#0062FF"/><path d="M75.3145 98.9015C82.8768 98.5495 88.814 97.1085 93.2475 92.6865C97.2056 88.7155 98.7424 83.6225 99.2731 77.1875C88.5155 77.4625 80.9752 86.8565 75.3145 98.9015Z" fill="#0062FF"/><path d="M19.2046 82.082C14.5832 82.082 11.1447 87.439 8.21484 94.38C13.378 98.208 20.1665 99.011 28.8345 99.011H33.1022C29.0114 89.265 24.4452 82.093 19.2046 82.093V82.082Z" fill="#0062FF"/><path d="M35.7997 49.4997L99.505 29.1387V28.6877C99.505 26.2017 99.4387 23.8807 99.2618 21.7027C93.0151 14.7837 87.0006 8.72266 81.2182 8.72266C74.3966 8.72266 66.4583 17.3357 58.509 25.9487C50.5596 34.5617 42.6213 43.1747 35.7997 43.1747C30.3933 43.1747 24.9315 37.8507 17.6234 32.5157C12.7809 28.9737 7.10908 25.4317 0.121617 23.4627C0.0331683 25.0357 0 26.6857 0 28.4017V30.2277L35.7997 49.5107V49.4997Z" fill="#000B1C"/><path d="M19.2045 51.4805C19.2045 51.4805 0 70.3015 0 70.2245V70.3125C0 72.5895 0.0552806 74.7345 0.19901 76.7475C1.73581 75.2515 3.20627 73.4365 4.76519 71.6215C8.46898 67.3205 12.6482 63.0085 19.2045 63.0085C27.3749 63.0085 33.9091 69.9715 39.5698 76.9235C45.2306 83.8865 50.0179 90.8385 54.7167 90.8385C59.4156 90.8385 63.0199 83.3915 69.2223 75.9445C75.4027 68.5415 84.2144 61.1385 99.505 61.0505V58.3445L19.2045 51.4805Z" fill="#000B1C"/><path d="M35.8 49.929L99.5053 39.721V29.15C93.1812 23.892 87.0783 19.25 81.2185 19.25C74.3969 19.25 66.4586 25.685 58.5093 32.12C50.5599 38.555 42.6216 44.99 35.8 44.99C30.3936 44.99 24.9319 41.008 17.6238 37.026C12.748 34.364 7.04306 31.702 -0.0107422 30.228V40.26L35.789 49.929H35.8Z" fill="#0062FF"/><path d="M19.2045 59.8063C27.3749 59.8063 33.9091 65.0093 39.5698 70.2123C45.2306 75.4153 50.0179 80.6183 54.7167 80.6183C59.4156 80.6183 63.0199 75.0523 69.2223 69.4863C75.4027 63.9533 84.2144 58.4093 99.505 58.3543V54.3613H6.68895L0 60.3123V70.2233C1.60314 69.0793 3.13994 67.6603 4.76519 66.2523C8.46898 63.0293 12.6482 59.8173 19.2045 59.8173V59.8063Z" fill="#0062FF"/><path d="M19.2048 55.087C27.3753 55.087 33.9094 57.694 39.5701 60.301C45.2309 62.908 50.0182 65.515 54.717 65.515C59.4159 65.515 63.0202 62.721 69.2226 59.927C75.403 57.155 84.2147 54.372 99.5053 54.35V39.709C93.1812 37.069 87.0783 34.748 81.2185 34.748C74.3969 34.748 66.4586 37.971 58.5093 41.205C50.5599 44.428 42.6216 47.662 35.8 47.662C30.3936 47.662 24.9319 45.66 17.6238 43.669C12.748 42.338 7.04306 40.996 -0.0107422 40.259V60.312C1.59239 59.74 3.12919 59.025 4.75444 58.321C8.45824 56.704 12.6375 55.098 19.1937 55.098L19.2048 55.087Z" fill="white"/></svg></a></div>
-        <button class="icon-btn" id="bellBtn" aria-label="Notifications"><svg class="ico" viewBox="0 0 24 24"><path d="M6 16.5V11a6 6 0 1 1 12 0v5.5l1.5 2H4.5z"/><path d="M10 21h4"/></svg><span class="dot-badge" id="bellBadge">1</span></button>
+        <span></span>
       </header>
 
       <main class="scroll">
-        <div class="banner reveal" style="--d:1" id="banner" aria-hidden="true"><svg id="bannerWaves"></svg></div>
-        <div class="mix reveal" style="--d:2">
-          <button class="mix-pill" id="mixBtn"><span class="pp"><svg class="i-pause" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1.3"/><rect x="14" y="5" width="4" height="14" rx="1.3"/></svg><svg class="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg></span>My riitm</button>
-          <button class="icon-btn" id="tuneBtn" aria-label="Tune My riitm"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M7 12h10M10 17h4"/></svg></button>
-        </div>
-        <p class="mix-cap reveal" style="--d:2">A playlist tailored to your taste</p>
-
-        <section class="ai-card reveal" style="--d:3" id="aiCard">
-          <div class="ai-art">
-            <div class="w"><svg id="cardWaves"></svg></div>
-            <div class="phone"><b>AI</b><div class="bars" id="cardBars"></div></div>
-            <span class="spk" style="left:20px;top:6px;width:16px;height:16px"><svg viewBox="0 0 24 24"><path d="M12 1l2.4 7.6L22 11l-7.6 2.4L12 21l-2.4-7.6L2 11l7.6-2.4z"/></svg></span>
-            <span class="spk" style="left:140px;top:18px;width:12px;height:12px;animation-delay:-.8s"><svg viewBox="0 0 24 24"><path d="M12 1l2.4 7.6L22 11l-7.6 2.4L12 21l-2.4-7.6L2 11l7.6-2.4z"/></svg></span>
-            <span class="spk" style="left:150px;top:140px;width:10px;height:10px;animation-delay:-1.6s"><svg viewBox="0 0 24 24"><path d="M12 1l2.4 7.6L22 11l-7.6 2.4L12 21l-2.4-7.6L2 11l7.6-2.4z"/></svg></span>
+        <div class="pick">
+          <div class="pick-h reveal" style="--d:1">
+            <h1>Choose a <em>demo</em></h1>
+            <p>Each feature plays out by itself. Tap anything to take over.</p>
           </div>
-          <h2>Create<br>your own track<br><em>with AI</em></h2>
-          <p>Turn your ideas into unique music — instantly in riitm</p>
-          <button class="cta" id="createBtn">Create a track<svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
-        </section>
 
-        <div class="sec-h reveal" style="--d:4"><h3>Recommended for you</h3><button id="seeAll">See all<svg class="ico" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button></div>
-        <div class="recs reveal" style="--d:4" id="recs"></div>
+          <button class="demo-card dc-gen reveal" style="--d:2" data-flow="create">
+            <div class="dc-art" aria-hidden="true">
+              <div class="w"><svg id="genWaves"></svg></div>
+              <div class="note"><b>AI</b><div class="bars" id="genBars"></div></div>
+            </div>
+            <span class="dc-k"><i></i>Demo 01 · Generation</span>
+            <h2>Create a track<br><em>with AI</em></h2>
+            <p>Describe an idea and watch it become a track.</p>
+            <span class="dc-go">Start demo<svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+          </button>
+
+          <button class="demo-card dc-search reveal" style="--d:3" data-flow="search">
+            <div class="dc-art" aria-hidden="true"><canvas id="pickOrb"></canvas>
+              <span class="glass"><svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5l-4.2-4.2"/></svg></span></div>
+            <span class="dc-k"><i></i>Demo 02 · AI search</span>
+            <h2>Find music<br><em>by describing it</em></h2>
+            <p>Describe a vibe and get a ready selection.</p>
+            <span class="dc-go">Start demo<svg class="ico" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+          </button>
+
+          <p class="pick-foot reveal" style="--d:4" id="pickHint" hidden>Opens full screen</p>
+        </div>
       </main>
-
-      <nav class="tabbar reveal" style="--d:5">
-        <button class="tab on" data-tab="Home"><span class="ti"><svg class="ico" viewBox="0 0 24 24"><path d="M3 8c3-3 6 3 9 0s6-3 9 0M3 13c3-3 6 3 9 0s6-3 9 0M3 18c3-3 6 3 9 0s6-3 9 0"/></svg></span>Home</button>
-        <button class="tab" data-tab="Search"><span class="ti"><svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20.5 20.5l-4.2-4.2"/></svg></span>Search</button>
-        <button class="tab" data-tab="Radio"><span class="ti"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"/><path d="M8.5 8.5a5 5 0 0 0 0 7M15.5 8.5a5 5 0 0 1 0 7M5.6 5.6a9 9 0 0 0 0 12.8M18.4 5.6a9 9 0 0 1 0 12.8"/></svg></span>Radio</button>
-        <button class="tab" data-tab="Library"><span class="ti"><svg class="ico" viewBox="0 0 24 24"><rect x="7" y="3" width="14" height="14" rx="2"/><path d="M3 7v12a2 2 0 0 0 2 2h12"/><path d="M12 13V7l4 1.5"/><circle cx="11" cy="13" r="1.6"/></svg></span>Library</button>
-      </nav>
+      <div class="pick-waves reveal" style="--d:4" aria-hidden="true"><svg id="pickWaves"></svg></div>
 
       <div class="toast" id="toast"><i></i><span></span></div>
     </div>
@@ -284,14 +274,12 @@ body.leaving .app{animation:leave .42s var(--ease) forwards}
   </div></div></div>
 
   <div class="toolbar" aria-label="Prototype controls">
-    <a href="index.html" class="on"><span class="n">01</span>Home</a>
-    <a href="create.html"><span class="n">02</span>Idea</a>
-    <a href="generating.html"><span class="n">03</span>Generate</a>
-    <a href="player.html"><span class="n">04</span>Track</a>
-    <a href="library.html"><span class="n">05</span>Library</a>
+    <a href="index.html" class="demos on"><svg class="ico" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>Demos</a>
+    <span class="sep"></span>
+    <a href="home.html?flow=create">Music generation</a>
+    <a href="home.html?flow=search">AI search</a>
     <a href="v1/index.html">v1</a>
     <span class="sep"></span>
-    <button id="restartBtn"><svg class="ico" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>Restart demo</button>
     <button id="fsBtn"><svg class="ico" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>Fullscreen</button>
   </div>
 </div>
@@ -325,7 +313,8 @@ makeWaves($('#bgWaves'),1600,1000,'#0062FF',[
   {y:360,amp:110,amp2:25,c:'#0062FF',period:1600,dur:46,rev:1,ph:2},{y:560,amp:120,amp2:40,c:'#9DFF00',period:1600,dur:38,ph:4},
   {y:640,amp:120,amp2:40,c:'#000B1C',period:1600,dur:38,ph:4.2},{y:820,amp:90,amp2:20,c:'#0062FF',period:1600,dur:50,rev:1,ph:1}]);
 $('#fsBtn').onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}};
-$('#restartBtn').onclick=()=>{try{sessionStorage.clear()}catch(e){}go('index.html')};
+// Restart replays the current feature's flow from its home screen (index.html is the demo selector)
+const rsb=$('#restartBtn');if(rsb)rsb.onclick=()=>{const f=store.get('flow','create');try{sessionStorage.clear()}catch(e){}go('home.html?flow='+f)};
 (function clock(){const c=$('#clock');if(!c)return;const tick=()=>{const d=new Date();c.textContent=(d.getHours()%12||12)+':'+String(d.getMinutes()).padStart(2,'0')};tick();setInterval(tick,15000)})();
 
 /* ───────── This page ───────── */
@@ -351,183 +340,102 @@ const Sheet={cur:null,
 if($('#sheetBg'))$('#sheetBg').onclick=()=>Sheet.close();
 $$('[data-close]').forEach(b=>b.onclick=()=>Sheet.close());
 
-/* Track model shared by the idea, generation, player and library screens */
-const VERSIONS={
-  base:{label:'',tag:'',bpm:80,dur:208,pal:'base'},
-  upbeat:{label:'More upbeat',tag:'More upbeat version',bpm:100,dur:182,pal:'upbeat'},
-  slower:{label:'Slower tempo',tag:'Slower tempo version',bpm:66,dur:236,pal:'slower'},
-  traditional:{label:'More traditional',tag:'Traditional instruments',bpm:80,dur:214,pal:'traditional'},
-  lofi:{label:'Lo-fi version',tag:'Lo-fi version',bpm:74,dur:196,pal:'lofi'}};
-const DEFAULT_PROMPT='Uzbek ethno-pop, traditional rubab and doira, modern lo-fi hip-hop beat, warm synth pads, gentle acoustic melody, atmospheric, soulful, 80 bpm';
-const DEFAULT_SETTINGS={genre:'Ethno-pop',mood:'Soulful',language:'Uzbek',tempo:'80 BPM'};
-const TITLES={'Ethno-pop':'Bukhara Nights','Lo-fi':'Rainy Window','Pop':'Brighter Days','EDM':'Neon Pulse','Hip-hop':'Night Shift','Acoustic':'Golden Hour','Alt-rock':'Paper Skies','Ambient':'Slow Orbit'};
-function settings(){return Object.assign({},DEFAULT_SETTINGS,store.get('settings',{}))}
-function isEthno(s){s=s||settings();return s.genre==='Ethno-pop'||s.language==='Uzbek'}
-function trackTitle(){return store.get('title',null)||TITLES[settings().genre]||'Bukhara Nights'}
 const fmt=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
 
 function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
-
-/* Artwork palettes: brand core + secondary colours (see brandbook) */
-const PALS={
-  base:       {sky0:'#01040F',sky1:'#0A1F5C',sky2:'#0E5A7A',glow:'#00FCDF',moon:'#B6FF38',d1:'#3FB8FF',d2:'#0062FF',ink:'#000B1C',orn:'#B6FF38',win:'#FFC15A'},
-  upbeat:     {sky0:'#12030F',sky1:'#4A0C46',sky2:'#B3264F',glow:'#FF7300',moon:'#FFE45C',d1:'#FF3D75',d2:'#8A03FF',ink:'#12020E',orn:'#FFE45C',win:'#FFD36B'},
-  slower:     {sky0:'#05020F',sky1:'#1B0640',sky2:'#3A1A7A',glow:'#8A03FF',moon:'#E9DBFF',d1:'#B07CFF',d2:'#5A12C9',ink:'#07021A',orn:'#E9DBFF',win:'#FFB648'},
-  traditional:{sky0:'#0A0601',sky1:'#2A1A05',sky2:'#7A5A12',glow:'#AE974F',moon:'#FFE6A3',d1:'#00FCDF',d2:'#0062FF',ink:'#0D0802',orn:'#E8C35A',win:'#FFC15A'},
-  lofi:       {sky0:'#020B0C',sky1:'#0A2B30',sky2:'#11605F',glow:'#3DFF5D',moon:'#B6FF38',d1:'#00FCDF',d2:'#1E6F8A',ink:'#02110F',orn:'#B6FF38',win:'#FFC15A'}};
-
-/* "Bukhara Nights" cover: a crescent over Bukhara's skyline (Kalyan minaret, blue domes, a lit portal)
-   above a band of girih ornament. Returns update(pos, level, bpm) for playback-driven animation. */
-function drawCover(svg,opt){
-  opt=Object.assign({pal:'base',seed:7,scene:'bukhara',title:'Bukhara Nights',sub:'80 BPM · ETHNO-POP',text:true,id:'c'+Math.random().toString(36).slice(2,7)},opt);
-  const P=PALS[opt.pal]||PALS.base,R=rng(opt.seed),id=opt.id;
-  svg.setAttribute('viewBox','0 0 400 400');
-  let stars='';for(let i=0;i<60;i++){const x=R()*400,y=R()*230,r=R()<.12?1.5:.5+R()*.6;stars+=`<circle class="st" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(2)}" fill="#fff" opacity="${(.3+R()*.6).toFixed(2)}"/>`}
-  const city=opt.scene==='bukhara'?`
-    <g fill="${P.ink}" opacity=".55">
-      <path d="M0 300 L0 282 Q14 262 28 282 L36 282 L36 268 L44 268 L44 300 Z"/><path d="M332 300 L332 270 L338 270 L338 252 L344 252 L344 270 L350 270 L350 300Z"/>
-      <path d="M150 300 L150 286 Q166 266 182 286 L182 300 Z"/><path d="M372 300 L372 288 Q386 270 400 288 L400 300 Z"/>
-    </g>
-    <g fill="${P.ink}">
-      <path d="M97 330 L123 330 L119 156 L101 156 Z"/>
-      <rect x="95" y="134" width="30" height="22" rx="2"/>
-      <path d="M97 134 Q110 112 123 134 Z"/><rect x="109" y="104" width="2" height="12"/>
-      <path d="M160 330 L160 244 L250 244 L250 330 Z"/>
-      <path d="M226 300 L226 254 L314 254 L314 300 Z"/>
-      <path d="M324 300 L324 278 L376 278 L376 300 Z"/>
-      <rect x="0" y="300" width="400" height="100"/>
-    </g>
-    <path d="M222 256 C222 196 318 196 318 256 Z" fill="url(#${id}dome)"/>
-    <path d="M222 256 C222 196 318 196 318 256" fill="none" stroke="${P.orn}" stroke-opacity=".5" stroke-width="1.2"/>
-    <rect x="269" y="186" width="2" height="22" fill="${P.orn}"/><circle cx="270" cy="184" r="3" fill="${P.orn}"/>
-    <path d="M322 280 C322 246 378 246 378 280 Z" fill="url(#${id}dome)" opacity=".92"/>
-    <g stroke="${P.orn}" stroke-opacity=".35" stroke-width="1"><line x1="100" y1="180" x2="120" y2="180"/><line x1="99" y1="220" x2="121" y2="220"/><line x1="98" y1="262" x2="122" y2="262"/><line x1="97" y1="300" x2="123" y2="300"/></g>
-    <g class="win" fill="${P.win}">
-      <path d="M180 330 L180 286 Q205 252 230 286 L230 330 Z" opacity=".9"/>
-      <path d="M100 152 L100 140 Q104 135 108 140 L108 152Z M112 152 L112 140 Q116 135 120 140 L120 152Z" opacity=".85"/>
-      <path d="M240 296 L240 278 Q246 270 252 278 L252 296Z M264 296 L264 278 Q270 270 276 278 L276 296Z M288 296 L288 278 Q294 270 300 278 L300 296Z" opacity=".7"/>
-    </g>
-    <rect x="168" y="250" width="74" height="6" fill="${P.orn}" opacity=".35"/>`
-  :`<g>${[0,1,2].map(i=>{let d=`M0 400 L0 ${260+i*22}`;for(let x=0;x<=400;x+=10)d+=` L${x} ${(260+i*22+Math.sin(x/58+i*1.7)*18).toFixed(1)}`;return `<path d="${d} L400 400Z" fill="${[`url(#${id}dome)`,P.d2,P.ink][i]}" opacity="${[.9,.8,1][i]}"/>`}).join('')}<rect y="300" width="400" height="100" fill="${P.ink}"/></g>`;
-  svg.innerHTML=`
-  <defs>
-    <linearGradient id="${id}sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${P.sky0}"/><stop offset=".55" stop-color="${P.sky1}"/><stop offset="1" stop-color="${P.sky2}"/></linearGradient>
-    <linearGradient id="${id}dome" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${P.d1}"/><stop offset="1" stop-color="${P.d2}"/></linearGradient>
-    <radialGradient id="${id}hz" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="${P.glow}" stop-opacity=".55"/><stop offset="1" stop-color="${P.glow}" stop-opacity="0"/></radialGradient>
-    <mask id="${id}cres" maskUnits="userSpaceOnUse" x="0" y="0" width="400" height="400"><circle cx="304" cy="88" r="34" fill="#fff"/><circle cx="320" cy="78" r="30" fill="#000"/></mask>
-    <filter id="${id}blur" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="14"/></filter>
-    <filter id="${id}grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .6 0"/></filter>
-    <pattern id="${id}girih" width="36" height="36" patternUnits="userSpaceOnUse">
-      <g fill="none" stroke="${P.orn}" stroke-width="1.1" stroke-opacity=".75">
-        <path d="M18 4 L22 14 L32 18 L22 22 L18 32 L14 22 L4 18 L14 14 Z"/><path d="M8 8 L28 8 L28 28 L8 28 Z" transform="rotate(45 18 18)" stroke-opacity=".4"/><circle cx="18" cy="18" r="3"/>
-        <path d="M0 0 L4 4 M36 0 L32 4 M0 36 L4 32 M36 36 L32 32" stroke-opacity=".5"/>
-      </g>
-    </pattern>
-  </defs>
-  <rect width="400" height="400" fill="url(#${id}sky)"/>
-  <g class="stars">${stars}</g>
-  <ellipse cx="200" cy="300" rx="280" ry="110" fill="url(#${id}hz)"/>
-  <circle class="mglow" cx="304" cy="88" r="44" fill="${P.moon}" opacity=".35" filter="url(#${id}blur)"/>
-  <circle cx="304" cy="88" r="34" fill="${P.moon}" mask="url(#${id}cres)"/>
-  ${city}
-  <g class="orn"><rect x="-36" y="326" width="472" height="36" fill="url(#${id}girih)"/></g>
-  <rect x="0" y="325" width="400" height="1.2" fill="${P.orn}" opacity=".6"/><rect x="0" y="362" width="400" height="1.2" fill="${P.orn}" opacity=".6"/>
-  ${opt.text?`<g class="logo-slot" transform="translate(22 22) scale(.15)"></g>
-  <text x="22" y="50" style="font-family:Archivo,Inter,sans-serif;font-stretch:125%" font-size="7" font-weight="500" letter-spacing="2.4" fill="#fff" opacity=".6">AI SESSIONS</text>
-  <text x="22" y="387" style="font-family:Archivo,Inter,sans-serif;font-stretch:125%" font-size="13" font-weight="800" fill="#fff">${opt.title.toUpperCase()}</text>
-  <text x="378" y="387" text-anchor="end" style="font-family:Archivo,Inter,sans-serif;font-stretch:125%" font-size="7" font-weight="500" letter-spacing="1.6" fill="#fff" opacity=".65">${opt.sub}</text>`:''}
-  <rect width="400" height="400" filter="url(#${id}grain)" opacity=".14" style="mix-blend-mode:overlay"/>`;
-  const lg=$('.logo svg'),slot=svg.querySelector('.logo-slot');if(lg&&slot)slot.innerHTML=lg.innerHTML;
-  const orn=svg.querySelector('.orn'),mg=svg.querySelector('.mglow'),win=svg.querySelector('.win'),st=[...svg.querySelectorAll('.st')];
-  return function update(pos,level,bpm){
-    const beat=(pos*(bpm||80)/60)%1,pulse=level!=null?level:Math.pow(1-beat,3);
-    orn.setAttribute('transform',`translate(${((pos*6)%36).toFixed(2)} 0)`);
-    mg.setAttribute('opacity',(.25+pulse*.35).toFixed(3));mg.setAttribute('r',(42+pulse*8).toFixed(1));
-    if(win)win.setAttribute('opacity',(.82+Math.sin(pos*7)*.08+pulse*.1).toFixed(3));
-    for(let i=0;i<st.length;i+=4)st[i].setAttribute('opacity',(.25+.5*Math.abs(Math.sin(pos*.8+i))).toFixed(2));
-  };
-}
 
 /* Small abstract covers for recommendations / library rows */
 function miniCover(seed,c){const R=rng(seed);let d='';for(let i=0;i<3;i++){let p=`M0 100 L0 ${55+i*14}`;const ph=R()*6;for(let x=0;x<=100;x+=5)p+=` L${x} ${(55+i*14+Math.sin(x/16+ph)*7).toFixed(1)}`;d+=`<path d="${p} L100 100Z" fill="${c[i+1]}" opacity="${[.95,.9,1][i]}"/>`}
   return `<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice"><rect width="100" height="100" fill="${c[0]}"/><circle cx="${30+R()*40}" cy="${28+R()*10}" r="${12+R()*8}" fill="${c[4]||'#B6FF38'}" opacity=".9"/>${d}</svg>`}
 
-/* ───── Home ───── */
-const BRAND_BAND=[
-  {y:18,amp:12,amp2:5,c:'#9DFF00',period:390,dur:7,ph:.2},
-  {y:34,amp:13,amp2:5,c:'#FFFFFF',period:390,dur:9,rev:1,ph:1.1},
-  {y:48,amp:13,amp2:6,c:'#0062FF',period:390,dur:6.5,ph:2},
-  {y:60,amp:12,amp2:5,c:'#000B1C',period:390,dur:8,rev:1,ph:2.9},
-  {y:66,amp:12,amp2:5,c:'#9DFF00',period:390,dur:8,rev:1,ph:2.9},
-  {y:82,amp:11,amp2:4,c:'#0B0C10',period:390,dur:7.5,ph:3.6}];
-makeWaves($('#bannerWaves'),390,104,null,BRAND_BAND);
-makeWaves($('#cardWaves'),200,90,null,[
-  {y:28,amp:9,c:'#9DFF00',period:200,dur:5},{y:40,amp:9,c:'#FFFFFF',period:200,dur:6,rev:1,ph:1},
-  {y:50,amp:9,c:'#0062FF',period:200,dur:5.5,ph:2},{y:62,amp:9,c:'#08174a',period:200,dur:6,rev:1,ph:2.6}]);
-$('#cardBars').innerHTML=Array.from({length:12},(_,i)=>`<i style="animation-delay:${(-i*.13).toFixed(2)}s;animation-duration:${(.8+(i%4)*.15).toFixed(2)}s"></i>`).join('');
+/* Mini player (home + search). Visual only: what's playing, like and progress carry across pages via store. */
+const Mini={dur:214,
+  s:Object.assign({t:'Fan',a:'The Adresov',from:'',p:.22,playing:false},store.get('np',{})),
+  likes(){return store.get('likes',['Fan'])},
+  save(){store.set('np',this.s)},
+  render(swap){const s=this.s,m=$('#mini');
+    $('#miniT').textContent=s.t;$('#miniA').textContent=s.a;
+    m.classList.toggle('playing',s.playing);$('#miniPP').setAttribute('aria-label',s.playing?'Pause':'Play');
+    $('#miniLike').classList.toggle('on',this.likes().includes(s.t));
+    $('#miniProg').style.width=(s.p*100).toFixed(2)+'%';
+    if(swap){m.classList.remove('swap');void m.offsetWidth;m.classList.add('swap')}
+    this.onChange&&this.onChange(s)},
+  play(t,a,from){const s=this.s,swap=!!t&&t!==s.t;
+    if(t){if(swap){s.t=t;s.a=a;s.p=0}s.from=from||''}
+    s.playing=true;this.save();this.render(swap);this.onPlay&&this.onPlay(s)},
+  pause(){this.s.playing=false;this.save();this.render()},
+  toggle(){this.s.playing?this.pause():this.play()},
+  init(){
+    $('#miniPP').onclick=()=>{this.toggle();toast(this.s.playing?`Playing “${this.s.t}”`:'Paused')};
+    $('#miniLike').onclick=()=>{let l=this.likes();const on=!l.includes(this.s.t);l=on?[...l,this.s.t]:l.filter(x=>x!==this.s.t);store.set('likes',l);this.render();toast(on?`Added “${this.s.t}” to My Music`:'Removed from My Music')};
+    $('#miniTxt').onclick=()=>toast(`${this.s.t} · ${this.s.a}`);
+    setInterval(()=>{if(!this.s.playing)return;this.s.p+=.25/this.dur;if(this.s.p>=1)this.s.p=0;$('#miniProg').style.width=(this.s.p*100).toFixed(2)+'%';this.save()},250);
+    this.render()}};
 
-const RECS=[['Sunset Lo-fi','Chill · 42 tracks',['#FF7300','#FF3D75','#8A03FF','#12020E','#FFE45C']],
-  ['Festival Mode','EDM · 60 tracks',['#0062FF','#9DFF00','#FFFFFF','#000B1C','#FF00CC']],
-  ['Ocean Drive','Indie · 35 tracks',['#00FCDF','#0062FF','#0A1F5C','#000B1C','#FFFFFF']],
-  ['Desert Dub','Ethno · 28 tracks',['#AE974F','#AA673E','#804421','#1A0F05','#FFE6A3']],
-  ['Night Shift','Hip-hop · 50 tracks',['#1B0640','#8A03FF','#FF3D75','#05020F','#B6FF38']]];
-$('#recs').innerHTML=RECS.map((r,i)=>`<button class="rec" data-i="${i}"><div class="cv">${miniCover(31+i*17,r[2])}</div><b>${r[0]}</b><small>${r[1]}</small></button>`).join('');
-$$('.rec').forEach(b=>b.onclick=()=>toast(`Opening “${RECS[b.dataset.i][0]}”`));
-$('#seeAll').onclick=()=>toast('All recommendations · updated daily');
 
-const mixBtn=$('#mixBtn');
-mixBtn.onclick=()=>{const paused=mixBtn.classList.toggle('paused');$('#banner').classList.toggle('paused',paused);toast(paused?'My riitm paused':'Playing My riitm')};
-$('#tuneBtn').onclick=()=>toast('Tune My riitm: moods, genres, discovery level');
-$('#profileBtn').onclick=()=>toast('Profile · riitm Premium');
-const ready=store.get('tracks',[]).length>0;
-$('#bellBtn').onclick=()=>{
-  if(ready){toast(`“${trackTitle()}” is ready — opening`);setTimeout(()=>go('player.html'),700)}
-  else toast('New: your weekly My riitm mix is ready');
-  $('#bellBadge').style.display='none'};
-$$('.tab').forEach(t=>t.onclick=()=>{const n=t.dataset.tab;if(n==='Library')go('library.html');else if(n!=='Home')toast(`${n} isn’t part of this prototype — try Create`)});
+/* "AI is thinking" orb: a glowing lime torus of ~40 tilted rings that slowly spins and breathes.
+   Drawn on a canvas sized from its box (works inside the scaled device frame). */
+function makeOrb(cv,opt){
+  opt=Object.assign({R:.29,r:.085,n:42,glow:1},opt);
+  const ctx=cv.getContext('2d');let raf=0,t0=performance.now(),on=false;
+  function size(){const r=cv.getBoundingClientRect(),k=r.width/cv.offsetWidth||1,d=Math.max(1,k)*(devicePixelRatio||1);
+    cv.width=Math.max(1,Math.round(cv.offsetWidth*d));cv.height=Math.max(1,Math.round(cv.offsetHeight*d));if(!on)draw(1.2)}
+  function draw(t){const W=cv.width,H=cv.height,u=Math.min(W,H),cx=W/2,cy=H/2;
+    ctx.clearRect(0,0,W,H);ctx.globalCompositeOperation='lighter';
+    const R=u*opt.R,r=u*opt.r,tilt=.62+Math.sin(t*.55)*.2,spin=t*.4,yaw=Math.sin(t*.37)*.45;
+    const ct=Math.cos(tilt),st=Math.sin(tilt),cw=Math.cos(yaw),sw=Math.sin(yaw);
+    const halo=ctx.createRadialGradient(cx,cy,0,cx,cy,R*1.9);halo.addColorStop(0,'rgba(182,255,56,.16)');halo.addColorStop(.6,'rgba(182,255,56,.05)');halo.addColorStop(1,'rgba(182,255,56,0)');
+    ctx.fillStyle=halo;ctx.fillRect(0,0,W,H);
+    ctx.lineWidth=Math.max(1,u*.0055);ctx.shadowColor='rgba(182,255,56,.85)';ctx.shadowBlur=u*.028*opt.glow;
+    for(let i=0;i<opt.n;i++){const a=i/opt.n*Math.PI*2+spin,ca=Math.cos(a),sa=Math.sin(a),rr=r*(1+.22*Math.sin(3*a+t*1.4));
+      ctx.beginPath();let zs=0;
+      for(let j=0;j<=32;j++){const v=j/32*Math.PI*2,cv_=Math.cos(v),sv=Math.sin(v);
+        const x=(R+rr*cv_)*ca,y=(R+rr*cv_)*sa,z=rr*sv;
+        const y1=y*ct-z*st,z1=y*st+z*ct,x2=x*cw+z1*sw,z2=-x*sw+z1*cw;
+        j?ctx.lineTo(cx+x2,cy+y1):ctx.moveTo(cx+x2,cy+y1);zs+=z2}
+      const depth=Math.min(1,Math.max(0,.5+.5*(zs/33)/(R*.9)));
+      ctx.strokeStyle=`rgba(${Math.round(160+60*depth)},255,${Math.round(40+80*depth)},${(.12+.4*depth).toFixed(3)})`;ctx.stroke()}
+    ctx.shadowBlur=0;ctx.globalCompositeOperation='source-over'}
+  function frame(now){if(!on)return;draw((now-t0)/1000+1.2);raf=requestAnimationFrame(frame)}
+  if(window.ResizeObserver)new ResizeObserver(size).observe(cv);size();
+  return{start(){if(on)return;on=true;raf=requestAnimationFrame(frame)},stop(){on=false;cancelAnimationFrame(raf)}}}
 
-function startCreate(x,y){const b=$('#createBtn');ripple(b,x,y);setTimeout(()=>go('create.html'),260)}
-$('#createBtn').addEventListener('click',e=>{e.stopPropagation();startCreate(e.clientX,e.clientY)});
-$('#aiCard').addEventListener('click',()=>startCreate());
+/* ───── Demo selector ───── */
+makeWaves($('#pickWaves'),390,72,null,[
+  {y:12,amp:9,amp2:4,c:'#9DFF00',period:390,dur:7,ph:.2},
+  {y:24,amp:10,amp2:4,c:'#FFFFFF',period:390,dur:9,rev:1,ph:1.1},
+  {y:34,amp:10,amp2:5,c:'#0062FF',period:390,dur:6.5,ph:2},
+  {y:44,amp:9,amp2:4,c:'#000B1C',period:390,dur:8,rev:1,ph:2.9},
+  {y:50,amp:9,amp2:4,c:'#9DFF00',period:390,dur:8,rev:1,ph:2.9},
+  {y:62,amp:8,amp2:3,c:'#0B0C10',period:390,dur:7.5,ph:3.6}]);
+makeWaves($('#genWaves'),200,84,null,[
+  {y:26,amp:9,c:'#9DFF00',period:200,dur:5},{y:38,amp:9,c:'#FFFFFF',period:200,dur:6,rev:1,ph:1},
+  {y:48,amp:9,c:'#0062FF',period:200,dur:5.5,ph:2},{y:60,amp:9,c:'#08174a',period:200,dur:6,rev:1,ph:2.6}]);
+$('#genBars').innerHTML=Array.from({length:12},(_,i)=>`<i style="animation-delay:${(-i*.13).toFixed(2)}s;animation-duration:${(.8+(i%4)*.15).toFixed(2)}s"></i>`).join('');
+makeOrb($('#pickOrb'),{R:.27,r:.075,n:34,glow:.8}).start();
 
-function runTour(){
-  store.set('demo',true);
-  Demo.run(async()=>{
-    await Demo.wait(1900);$('#aiCard').classList.add('glow');
-    await Demo.wait(1100);tapFx($('#createBtn'));
-    await Demo.wait(160);startCreate();
-  });
-}
+// Phones (top level, not installed): the tap that picks a demo is also the gesture that opens fullscreen.
+// The flow then runs inside a full-screen iframe so fullscreen survives page changes (skill patterns §8).
+const docEl=document.documentElement,requestFs=docEl.requestFullscreen||docEl.webkitRequestFullscreen;
+const phoneTop=()=>matchMedia('(max-width:520px)').matches&&window.self===window.top&&
+  !(matchMedia('(display-mode: fullscreen),(display-mode: standalone)').matches||navigator.standalone===true);
+if(phoneTop()){$('#pickHint').hidden=false;if(!requestFs)$('#pickHint').textContent='Tip: Share → Add to Home Screen to run it full screen'}
 
-/* Phones: tap-to-start splash, then run the flow inside a full-screen frame so fullscreen survives page changes */
-function showSplash(){
-  const s=document.createElement('button');s.className='splash';s.setAttribute('aria-label','Tap to start the riitm demo');
-  s.innerHTML=`<span class="s-logo">${$('.logo').innerHTML}</span><h2>Create your own<br>track <em>with AI</em></h2><p>Turn your ideas into unique music</p>
-    <span class="s-btn"><svg viewBox="0 0 24 24"><path d="M7 5.3v13.4a1 1 0 0 0 1.5.9l10.9-6.7a1 1 0 0 0 0-1.8L8.5 4.4A1 1 0 0 0 7 5.3z"/></svg>Tap to start</span>
-    <small id="splashHint">Opens full screen · sound on</small><span class="s-waves" aria-hidden="true"><svg id="splashWaves"></svg></span>`;
-  document.body.appendChild(s);
-  makeWaves($('#splashWaves'),390,150,null,BRAND_BAND.map(l=>Object.assign({},l,{y:l.y+40})));
-  const el=document.documentElement,request=el.requestFullscreen||el.webkitRequestFullscreen;
-  if(!request)$('#splashHint').textContent='Tip: Share → Add to Home Screen to run it full screen';
-  // If the window grows past phone width (rotation, resize), the splash is hidden by CSS, so start the tour instead
-  const mq=matchMedia('(max-width:520px)'),onWide=e=>{if(!e.matches&&s.isConnected){s.remove();mq.removeEventListener('change',onWide);runTour()}};
-  mq.addEventListener('change',onWide);
-  s.addEventListener('click',async()=>{
-    let full=false;
-    if(request){try{await Promise.race([request.call(el,{navigationUI:'hide'}),new Promise(r=>setTimeout(r,800))])}catch(e){}full=!!(document.fullscreenElement||document.webkitFullscreenElement)}
+async function launch(flow,card,x,y){
+  ripple($('.dc-go',card),x,y);
+  try{sessionStorage.clear()}catch(e){}
+  store.set('flow',flow);
+  const url='home.html?flow='+flow;
+  if(phoneTop()&&requestFs){
+    try{await Promise.race([requestFs.call(docEl,{navigationUI:'hide'}),new Promise(r=>setTimeout(r,800))])}catch(e){}
     try{screen.orientation.lock('portrait').catch(()=>{})}catch(e){}
-    if(full){
-      const f=document.createElement('iframe');f.className='shell';f.allow='autoplay; fullscreen';f.title='riitm';f.src='index.html?embed=1';
-      f.onload=()=>{s.classList.add('gone');$('.stage').style.display='none';setTimeout(()=>s.remove(),600)};
-      document.body.appendChild(f);
-    }else{s.classList.add('gone');setTimeout(()=>s.remove(),600);runTour()}
-  },{once:true});
+    if(document.fullscreenElement||document.webkitFullscreenElement){
+      const f=document.createElement('iframe');f.className='shell';f.allow='autoplay; fullscreen';f.title='riitm';f.src=url+'&embed=1';
+      f.onload=()=>{$('.stage').style.display='none'};document.body.appendChild(f);return}
+  }
+  setTimeout(()=>go(url),240);
 }
-
-if(params.get('demo')==='0'){/* arrived on purpose: no tour */}
-else if(matchMedia('(max-width:520px)').matches&&window.self===window.top&&
-  !(matchMedia('(display-mode: fullscreen),(display-mode: standalone)').matches||navigator.standalone===true)){showSplash()}
-else runTour();
+$$('.demo-card').forEach(c=>c.addEventListener('click',e=>launch(c.dataset.flow,c,e.clientX||null,e.clientY||null)));
 
 </script>
 </body>

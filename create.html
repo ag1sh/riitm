@@ -53,7 +53,7 @@ svg{display:block}
 .icon-btn:active{transform:scale(.92)}
 .icon-btn svg{width:19px;height:19px}
 .ico{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.toolbar{position:relative;z-index:2;display:flex;align-items:center;gap:4px;padding:5px;border-radius:999px;background:rgba(11,12,16,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line)}
+.toolbar{position:relative;z-index:2;display:flex;align-items:center;gap:4px;max-width:calc(100vw - 24px);overflow-x:auto;scrollbar-width:none;padding:5px;border-radius:999px;background:rgba(11,12,16,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line)}
 .toolbar a,.toolbar button{height:34px;padding:0 14px;border-radius:999px;display:inline-flex;align-items:center;gap:7px;font:500 12.5px var(--fb);color:var(--muted);text-decoration:none;transition:color .2s,background .2s;white-space:nowrap}
 .toolbar a:hover,.toolbar button:hover{color:var(--text);background:rgba(255,255,255,.06)}
 .toolbar a.on{background:var(--lime);color:#0B0C10}
@@ -248,7 +248,9 @@ body.leaving .app{animation:leave .42s var(--ease) forwards}
   </div></div></div>
 
   <div class="toolbar" aria-label="Prototype controls">
-    <a href="index.html"><span class="n">01</span>Home</a>
+    <a href="index.html" class="demos"><svg class="ico" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>Demos</a>
+    <span class="sep"></span>
+    <a href="home.html?flow=create"><span class="n">01</span>Home</a>
     <a href="create.html" class="on"><span class="n">02</span>Idea</a>
     <a href="generating.html"><span class="n">03</span>Generate</a>
     <a href="player.html"><span class="n">04</span>Track</a>
@@ -289,7 +291,8 @@ makeWaves($('#bgWaves'),1600,1000,'#0062FF',[
   {y:360,amp:110,amp2:25,c:'#0062FF',period:1600,dur:46,rev:1,ph:2},{y:560,amp:120,amp2:40,c:'#9DFF00',period:1600,dur:38,ph:4},
   {y:640,amp:120,amp2:40,c:'#000B1C',period:1600,dur:38,ph:4.2},{y:820,amp:90,amp2:20,c:'#0062FF',period:1600,dur:50,rev:1,ph:1}]);
 $('#fsBtn').onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}};
-$('#restartBtn').onclick=()=>{try{sessionStorage.clear()}catch(e){}go('index.html')};
+// Restart replays the current feature's flow from its home screen (index.html is the demo selector)
+const rsb=$('#restartBtn');if(rsb)rsb.onclick=()=>{const f=store.get('flow','create');try{sessionStorage.clear()}catch(e){}go('home.html?flow='+f)};
 (function clock(){const c=$('#clock');if(!c)return;const tick=()=>{const d=new Date();c.textContent=(d.getHours()%12||12)+':'+String(d.getMinutes()).padStart(2,'0')};tick();setInterval(tick,15000)})();
 
 /* ───────── This page ───────── */
@@ -421,13 +424,13 @@ const ta=$('#prompt'),field=$('#field'),mirror=$('#mirror'),count=$('#count'),ge
 const OPTIONS={
   genre:['Ethno-pop','Lo-fi','Pop','EDM','Hip-hop','Acoustic','Alt-rock','Ambient'],
   mood:['Soulful','Chill','Energetic','Romantic','Uplifting','Melancholic'],
-  language:['Uzbek','English','Russian','Instrumental'],
+  language:['Uzbek','English','Russian'],
   tempo:['66 BPM','70 BPM','75 BPM','80 BPM','90 BPM','100 BPM','110 BPM','120 BPM','128 BPM']};
 const LABEL={genre:'Genre',mood:'Mood',language:'Language',tempo:'Tempo'};
-const FALLBACK={genre:'Pop',mood:'Chill',language:'Instrumental',tempo:'100 BPM'};
+const FALLBACK={genre:'Pop',mood:'Chill',language:'English',tempo:'100 BPM'};
 const IDEAS=[
-  ['For a workout','High-energy workout track, punchy drums, driving bassline, motivating synth hooks, big drops, 128 bpm',{genre:'EDM',mood:'Energetic',language:'Instrumental',tempo:'128 BPM'}],
-  ['Chill vibes','Chill lo-fi beats, mellow Rhodes chords, vinyl crackle, soft rain in the background, cozy and calm, 75 bpm',{genre:'Lo-fi',mood:'Chill',language:'Instrumental',tempo:'75 BPM'}],
+  ['For a workout','High-energy workout track, punchy drums, driving bassline, motivating synth hooks, big drops, 128 bpm',{genre:'EDM',mood:'Energetic',language:'English',tempo:'128 BPM'}],
+  ['Chill vibes','Chill lo-fi beats, mellow Rhodes chords, vinyl crackle, soft rain in the background, cozy and calm, 75 bpm',{genre:'Lo-fi',mood:'Chill',language:'English',tempo:'75 BPM'}],
   ['Romantic','Romantic acoustic ballad, warm fingerpicked guitar, soft strings, intimate vocals about first love, 70 bpm',{genre:'Acoustic',mood:'Romantic',language:'English',tempo:'70 BPM'}],
   ['For a party','Upbeat party anthem, festival drop, catchy vocal chops, bright supersaw chords, 120 bpm',{genre:'EDM',mood:'Energetic',language:'English',tempo:'120 BPM'}],
   ['Motivational','Uplifting motivational pop, soaring chorus, claps, bright piano, feel-good energy, 110 bpm',{genre:'Pop',mood:'Uplifting',language:'English',tempo:'110 BPM'}],
@@ -445,7 +448,7 @@ function detect(text){const t=text.toLowerCase(),out={};
   else if(/ambient/.test(t))out.genre='Ambient';else if(/\bpop\b/.test(t))out.genre='Pop';
   if(/soulful/.test(t))out.mood='Soulful';else if(/chill|mellow|calm|cozy/.test(t))out.mood='Chill';else if(/energ|workout|punchy|party/.test(t))out.mood='Energetic';
   else if(/romantic|love/.test(t))out.mood='Romantic';else if(/uplift|motivat|anthem|hopeful/.test(t))out.mood='Uplifting';else if(/sad|melanchol/.test(t))out.mood='Melancholic';
-  if(/uzbek|rubab|doira/.test(t))out.language='Uzbek';else if(/instrumental|beats\b/.test(t))out.language='Instrumental';else if(/russian/.test(t))out.language='Russian';else if(/english|vocals/.test(t))out.language='English';
+  if(/uzbek|rubab|doira/.test(t))out.language='Uzbek';else if(/russian/.test(t))out.language='Russian';else if(/english|vocals/.test(t))out.language='English';
   const m=t.match(/(\d{2,3})\s*bpm/);if(m&&+m[1]>=50&&+m[1]<=200)out.tempo=m[1]+' BPM';
   for(const k in out)if(!manual.has(k))setVal(k,out[k],true)}
 // The box grows with its text (no scrollbar); only past max-height does it scroll, with the slim scrollbar
@@ -473,7 +476,7 @@ function generate(){
   store.set('prompt',text);store.set('settings',resolved);store.set('title',null);store.set('version','base');
   ripple(genBtn);genBtn.classList.add('go');setTimeout(()=>go('generating.html'),300)}
 genBtn.onclick=()=>generate();
-$('#backBtn').onclick=()=>go(params.get('edit')?'player.html':'index.html?demo=0');
+$('#backBtn').onclick=()=>go(params.get('edit')?'player.html':'home.html?demo=0');
 
 /* Initial state */
 const editing=params.get('edit')==='1';
