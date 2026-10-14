@@ -228,8 +228,7 @@ body:not(.paused) .cp::before{opacity:.55;transform:scale(calc(1 + var(--lv,0) *
     <a href="ijro.html?at=profile" data-step="2"><span class="n">02</span>riitm.uz</a>
     <a href="ijro.html?at=post" data-step="3"><span class="n">03</span>Teaser</a>
     <a href="ijro-app.html?launch=1" data-step="4"><span class="n">04</span>riitm</a>
-    <a href="ijro-app.html?at=foryou" data-step="5"><span class="n">05</span>Playlist</a>
-    <a href="ijro-player.html" data-step="6"><span class="n">06</span>Play</a>
+    <a href="ijro-player.html" data-step="5"><span class="n">05</span>Play</a>
     <span class="sep"></span>
     <button id="restartBtn"><svg class="ico" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>Restart demo</button>
     <button id="fsBtn"><svg class="ico" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>Fullscreen</button>
@@ -373,7 +372,7 @@ const IC={
   heart:'<svg viewBox="0 0 24 24"><path d="M12 20.3s-7.6-4.6-9.3-9.4C1.6 7.6 3.9 4.6 7.3 4.6c2 0 3.7 1.1 4.7 2.8 1-1.7 2.7-2.8 4.7-2.8 3.4 0 5.7 3 4.6 6.3-1.7 4.8-9.3 9.4-9.3 9.4z"/></svg>'};
 
 /* ───── Player ───── */
-Track.init();markStep(6);
+Track.init();markStep(5);
 const seekEl=$('#seek');
 $('#likeBtn').innerHTML=IC.heart;
 function renderLike(){$('#likeBtn').classList.toggle('on',Likes.on())}

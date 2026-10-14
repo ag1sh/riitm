@@ -185,7 +185,9 @@ body.in-app .ig.notr,.notr,.notr *{transition:none!important}
 .igp-n b{display:flex;align-items:center;gap:5px;font:600 13.5px var(--fb)}
 .igp-n small{display:block;margin-top:2px;font:400 12px var(--fb);color:#E0E0E0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .igp-media{position:relative;width:100%;aspect-ratio:1;background:#121212;overflow:hidden}
-.igp-media svg{width:100%;height:100%}
+.igp-media img{width:100%;height:100%;object-fit:cover;display:block}
+.igp-media.tall{aspect-ratio:4/5}
+.igp-h button.igp-n,.igp-h button.av{text-align:left}
 .igp-act{display:flex;align-items:center;padding:4px 4px 0}
 .igp-act .save{margin-left:auto}
 .igp-act .lk svg{width:26px;height:26px}
@@ -228,10 +230,10 @@ body.in-app .ig.notr,.notr,.notr *{transition:none!important}
 .sfield.typing .mirror{display:flex}
 .caret{display:inline-block;width:2px;height:18px;margin-left:1px;background:var(--ig-blue);animation:blink 1s steps(1) infinite}
 @keyframes blink{50%{opacity:0}}
-.explore{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.explore{display:grid;grid-template-columns:repeat(3,1fr);grid-auto-flow:dense;gap:2px}
 .explore .ex{aspect-ratio:1;overflow:hidden}
 .explore .ex.tall{grid-row:span 2;aspect-ratio:auto}
-.explore svg{width:100%;height:100%}
+.explore img{width:100%;height:100%;object-fit:cover;display:block}
 .results{padding:2px 0}
 .res{display:flex;align-items:center;gap:12px;width:100%;padding:8px 14px;text-align:left;transition:background .2s;animation:rise .45s var(--ease) both}
 .res:hover,.res.tap{background:rgba(255,255,255,.06)}
@@ -253,7 +255,8 @@ body.in-app .ig.notr,.notr,.notr *{transition:none!important}
 .pf-bio{padding:12px 16px 0;font:400 13.5px/1.42 var(--fb)}
 .pf-bio small{display:block;font:400 13px var(--fb);color:var(--ig-mut)}
 .pf-link{display:inline-flex;align-items:center;gap:5px;margin-top:2px;font:600 13.5px var(--fb);color:#E0F1FF}
-.pf-link svg{width:15px;height:15px}
+.pf-link svg{width:15px;height:15px;flex:none}
+.pf-link .more{color:#F5F5F5;font-weight:600}
 .pf-btns{display:flex;gap:6px;padding:14px 16px 0}
 .pf-btns button{height:34px;border-radius:9px;font:600 14px var(--fb);transition:transform .2s var(--ease),background .2s}
 .pf-btns button:active{transform:scale(.96)}
@@ -263,10 +266,11 @@ body.in-app .ig.notr,.notr,.notr *{transition:none!important}
 .pf-btn.sq{flex:none;width:36px;display:grid;place-items:center}
 .pf-btn.sq svg{width:17px;height:17px}
 .pf-hl{display:flex;gap:16px;padding:16px 16px 6px;overflow-x:auto}
-.hl-it{display:flex;flex-direction:column;align-items:center;gap:6px;flex:none;width:64px;font:400 12px var(--fb)}
+.hl-it{display:flex;flex-direction:column;align-items:center;gap:6px;flex:none;width:72px;font:400 12px var(--fb)}
+.hl-it>span:last-child{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hl-it .c{width:64px;height:64px;border-radius:50%;padding:3px;box-shadow:inset 0 0 0 1px #363636;display:grid;place-items:center}
 .hl-it .c>span{width:100%;height:100%;border-radius:50%;overflow:hidden;display:block}
-.hl-it .c svg{width:100%;height:100%}
+.hl-it .c img{width:100%;height:100%;object-fit:cover;display:block}
 .pf-tabs{display:flex;margin-top:8px;border-bottom:1px solid var(--ig-line)}
 .pf-tabs button{flex:1;height:44px;display:grid;place-items:center;color:var(--ig-mut);border-bottom:1px solid transparent;margin-bottom:-1px}
 .pf-tabs button.on{color:#F5F5F5;border-color:#F5F5F5}
@@ -332,14 +336,14 @@ body.in-app .ig.notr,.notr,.notr *{transition:none!important}
             <div class="scroll">
               <div class="stories hide-x" id="stories"></div>
               <article class="igp">
-                <div class="igp-h"><span class="av sm" style="--a:#FF7300;--b:#8A03FF">T</span><span class="igp-n"><b>tashkent.today</b><small>Tashkent, Uzbekistan</small></span><button class="igb" data-toast="Post options"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button></div>
-                <div class="igp-media" id="feedArt"></div>
+                <div class="igp-h"><button class="av sm ring" data-acc="riitm"><img src="media/instagram/avatar.jpg" alt=""></button><button class="igp-n" data-acc="riitm"><b>riitm.uz <span class="vf"></span></b><small>Sponsored</small></button><button class="igb" data-toast="Post options"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button></div>
+                <div class="igp-media tall"><img src="media/instagram/post06.jpg" alt="Ilovada qanday yangiliklar bor?"></div>
                 <div class="igp-act"><button class="igb lk" data-like><svg viewBox="0 0 24 24"><path d="M12 20.3s-7.6-4.6-9.3-9.4C1.6 7.6 3.9 4.6 7.3 4.6c2 0 3.7 1.1 4.7 2.8 1-1.7 2.7-2.8 4.7-2.8 3.4 0 5.7 3 4.6 6.3-1.7 4.8-9.3 9.4-9.3 9.4z"/></svg></button>
                   <button class="igb" data-toast="Comments"><svg class="ico" viewBox="0 0 24 24"><path d="M20.8 11.6a8.6 8.6 0 0 1-12.5 7.6L3 20.6l1.5-5A8.6 8.6 0 1 1 20.8 11.6z"/></svg></button>
                   <button class="igb" data-toast="Share"><svg class="ico" viewBox="0 0 24 24"><path d="M21.5 3 3 10.2l7.4 3.1L21.5 3z"/><path d="M21.5 3 14.6 21l-4.2-7.7"/></svg></button>
                   <button class="igb save" data-toast="Saved"><svg class="ico" viewBox="0 0 24 24"><path d="M6 3.5h12v17l-6-4.5-6 4.5z"/></svg></button></div>
                 <p class="igp-likes">1,284 likes</p>
-                <p class="igp-cap"><b>tashkent.today</b> Golden hour over the city 🌇</p>
+                <p class="igp-cap"><b>riitm.uz</b> Ilovada qanday yangiliklar bor? 👀</p>
               </article>
             </div>
           </div>
@@ -363,13 +367,12 @@ body.in-app .ig.notr,.notr,.notr *{transition:none!important}
               <button class="igb" data-toast="Profile options"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button></span></div>
             <div class="scroll" id="profScroll">
               <div class="pf-top">
-                <span class="pf-av ring"><img src="icon.svg" alt=""></span>
+                <span class="pf-av ring"><img src="media/instagram/avatar.jpg" alt=""></span>
                 <div class="pf-stats"><b class="pf-name">riitm</b>
-                  <div><span><b>318</b>posts</span><span><b>52.4K</b>followers</span><span><b>14</b>following</span></div></div>
+                  <div><span><b>216</b>posts</span><span><b>8,568</b>followers</span><span><b>0</b>following</span></div></div>
               </div>
-              <div class="pf-bio"><small>Music streaming app</small>
-                <p>Uzbekistan's music, in one app 🎧<br>🎙 Yangi Ijro — new covers you won't hear anywhere else</p>
-                <button class="pf-link" id="bioLink"><svg class="ico" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>riitm.uz</button></div>
+              <div class="pf-bio"><p>25M+ trekli musiqiy servis 🎧<br>30 kun musiqa - 1 so’m 💎</p>
+                <button class="pf-link" id="bioLink"><svg class="ico" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>riitm.onelink.me/exg8/riitm-insta <span class="more">and 2 more</span></button></div>
               <div class="pf-btns"><button class="pf-follow" id="followBtn">Follow</button><button class="pf-btn" data-toast="Messages">Message</button><button class="pf-btn sq" data-toast="Suggested accounts"><svg class="ico" viewBox="0 0 24 24"><circle cx="10" cy="8" r="4"/><path d="M3 20a7 7 0 0 1 14 0M19 8v6M16 11h6"/></svg></button></div>
               <div class="pf-hl hide-x" id="highlights"></div>
               <div class="pf-tabs"><button class="on" aria-label="Posts"><svg class="ico" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="M9.2 3.5v17M14.8 3.5v17M3.5 9.2h17M3.5 14.8h17"/></svg></button>
@@ -383,7 +386,7 @@ body.in-app .ig.notr,.notr,.notr *{transition:none!important}
             <div class="ig-bar"><button class="igb" data-back><svg class="ico" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button><b class="ig-bar-t c">Posts</b><span class="ig-bar-r"></span></div>
             <div class="scroll">
               <article class="igp">
-                <div class="igp-h"><span class="av sm ring"><img src="icon.svg" alt=""></span><span class="igp-n"><b>riitm.uz <span class="vf"></span></b><small>Shukur Fazo &amp; Shaxriyor · Kerak emas (cover)</small></span><button class="igb" data-toast="Post options"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button></div>
+                <div class="igp-h"><span class="av sm ring"><img src="media/instagram/avatar.jpg" alt=""></span><span class="igp-n"><b>riitm.uz <span class="vf"></span></b><small>Shukur Fazo &amp; Shaxriyor · Kerak emas (cover)</small></span><button class="igb" data-toast="Post options"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></button></div>
                 <div class="igp-media vid" id="vidBox">
                   <video id="teaser" src="media/yangi-ijro.mp4" poster="media/yangi-ijro-poster.jpg" playsinline muted preload="auto"></video>
                   <span class="v-time" id="vTime">0:05</span>
@@ -426,8 +429,7 @@ body.in-app .ig.notr,.notr,.notr *{transition:none!important}
     <a href="ijro.html?at=profile" data-step="2"><span class="n">02</span>riitm.uz</a>
     <a href="ijro.html?at=post" data-step="3"><span class="n">03</span>Teaser</a>
     <a href="ijro-app.html?launch=1" data-step="4"><span class="n">04</span>riitm</a>
-    <a href="ijro-app.html?at=foryou" data-step="5"><span class="n">05</span>Playlist</a>
-    <a href="ijro-player.html" data-step="6"><span class="n">06</span>Play</a>
+    <a href="ijro-player.html" data-step="5"><span class="n">05</span>Play</a>
     <span class="sep"></span>
     <button id="restartBtn"><svg class="ico" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>Restart demo</button>
     <button id="fsBtn"><svg class="ico" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>Fullscreen</button>
@@ -606,36 +608,27 @@ $$('.app-ic').forEach(b=>b.onclick=()=>{const n=b.dataset.app;
   if(n==='riitm')return openRiitm(b);
   b.classList.remove('wiggle');void b.offsetWidth;b.classList.add('wiggle');toast('Open Instagram or riitm for this demo')});
 
-/* Generated art: feed photo, explore grid, profile grid, highlights (brand + secondary palette) */
-function sunsetArt(seed){const R=rng(seed);let sky='';for(let i=0;i<34;i++){const w=14+R()*26,h=40+R()*120,x=i*12-10;sky+=`<rect x="${x.toFixed(0)}" y="${(400-h).toFixed(0)}" width="${w.toFixed(0)}" height="${h.toFixed(0)}" fill="#0b0716"/>`;
-    for(let j=0;j<4;j++)if(R()>.55)sky+=`<rect x="${(x+3+R()*(w-6)).toFixed(0)}" y="${(400-h+8+R()*(h-16)).toFixed(0)}" width="2.4" height="3.4" fill="#FFB547" opacity=".8"/>`}
-  return `<svg viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="sk${seed}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a0f5c"/><stop offset=".45" stop-color="#c2366b"/><stop offset=".75" stop-color="#FF7300"/><stop offset="1" stop-color="#FFC15E"/></linearGradient></defs>
-    <rect width="400" height="400" fill="url(#sk${seed})"/><circle cx="250" cy="285" r="58" fill="#FFE08A" opacity=".95"/><rect x="186" y="150" width="7" height="250" fill="#0b0716"/><circle cx="189.5" cy="215" r="13" fill="#0b0716"/><path d="M189.5 120v30" stroke="#0b0716" stroke-width="2.5"/>${sky}</svg>`}
-function absArt(seed,c){const R=rng(seed);let s='';const k=R();
-  if(k<.34){for(let i=0;i<5;i++)s+=`<circle cx="${(R()*100).toFixed(0)}" cy="${(R()*100).toFixed(0)}" r="${(10+R()*30).toFixed(0)}" fill="${c[i%c.length]}" opacity=".8"/>`}
-  else if(k<.67){for(let i=0;i<5;i++){let d=`M-5 ${30+i*14}`;for(let x=0;x<=110;x+=10)d+=` L${x} ${(30+i*14+Math.sin(x/14+i+R()*2)*7).toFixed(1)}`;s+=`<path d="${d}" fill="none" stroke="${c[i%c.length]}" stroke-width="7" stroke-linecap="round"/>`}}
-  else{for(let i=0;i<9;i++){const h=10+R()*70;s+=`<rect x="${8+i*10}" y="${(50-h/2).toFixed(0)}" width="6" height="${h.toFixed(0)}" rx="3" fill="${c[i%c.length]}"/>`}}
-  return `<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice"><rect width="100" height="100" fill="${c[c.length-1]}"/>${s}</svg>`}
-const PAL=[['#9DFF00','#0062FF','#000B1C'],['#FF3D75','#8A03FF','#1a0630'],['#00FCDF','#0062FF','#04122e'],['#FF7300','#FF3D3D','#2a0c05'],['#DBF717','#3DFF5D','#0d1f0a'],['#FF00CC','#00FCDF','#160a26'],['#AE974F','#FFFFFF','#1b1710']];
-$('#feedArt').innerHTML=sunsetArt(7);
-$('#explore').innerHTML=Array.from({length:15},(_,i)=>`<div class="ex${i===1||i===9?' tall':''}">${absArt(40+i,PAL[i%PAL.length])}</div>`).join('');
+/* Real images from instagram.com/riitm.uz (saved to media/instagram/) */
+const IG=['post02','post03','post04-reel','post05-reel','post06','post07','post08-reel','post09-reel','post10-reel','post11','post12-reel'].map(n=>({src:`media/instagram/${n}.jpg`,reel:n.endsWith('reel')}));
+// Explore: 10 unique tiles, two reels in the tall cells (3 columns × 4 rows, no gaps)
+const EX=['post06','post04-reel','post02','post07','post03','post11','post09-reel','post05-reel','post08-reel','post12-reel'],EX_TALL=[1,6];
+$('#explore').innerHTML=EX.map((n,i)=>`<div class="ex${EX_TALL.includes(i)?' tall':''}" data-toast="Not part of this demo"><img src="media/instagram/${n}.jpg" alt="" loading="lazy"></div>`).join('');
 
 const STORIES=[['Your story','#3DFF5D','#0062FF','A',1],['riitm.uz','','','',0],['tashkent.today','#FF7300','#8A03FF','T',0],['kino.uz','#FF3D3D','#FF00CC','K',0],['samarkand.eats','#DBF717','#FF7300','S',1],['bukhara.trip','#00FCDF','#0062FF','B',1]];
 $('#stories').innerHTML=STORIES.map(([n,a,b,l,seen])=>n==='riitm.uz'
-  ?`<button class="story" data-acc="riitm"><span class="av ring"><img src="icon.svg" alt=""></span><span>${n}</span></button>`
+  ?`<button class="story" data-acc="riitm"><span class="av ring"><img src="media/instagram/avatar.jpg" alt=""></span><span>${n}</span></button>`
   :`<button class="story" data-toast="${l==='A'?'Add to your story':n+'’s story'}"><span class="av${seen?' seen':' ring'}" style="--a:${a};--b:${b}"><span class="av" style="--a:${a};--b:${b};width:100%;height:100%;box-shadow:0 0 0 2.5px #000">${l}</span></span><span>${n}</span></button>`).join('');
 
-// Profile grid: the pinned Yangi Ijro reel first, then brand posts
+// Profile grid: the pinned Yangi Ijro reel first, then the real posts
 const PIN='<svg class="ti l" viewBox="0 0 24 24" fill="currentColor"><path d="M9 3h6l-1 6.5 3.2 3.2H6.8L10 9.5z"/><path d="M11.3 12.7h1.4V21l-.7.8-.7-.8z"/></svg>',
       REEL='<svg class="ti" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><path d="M3.5 8.5h17M9 3.5l3 5M14.5 3.5l3 5"/><path d="M10.5 12v5l4-2.5z" fill="currentColor"/></svg>';
-const POSTS=[['AI Mixes','New',PAL[2]],['Top 100','Uzbekistan',PAL[1]],['Radio','Live 24/7',PAL[0]],['In Trend','This week',PAL[3]],['Podcasts','Listen',PAL[6]],['Mood','Chill',PAL[5]],['Concerts','Tashkent',PAL[4]],['Yangi Ijro','Soon',PAL[0]]];
 $('#grid').innerHTML=`<button class="tile yi" id="yiTile"><img src="media/yangi-ijro-poster.jpg" alt="">${PIN}${REEL}<span class="cap"><small>Yangi Ijro</small><b>Kerak emas<br>(cover)</b></span></button>`+
-  POSTS.map(([t,s,c],i)=>`<button class="tile" data-toast="${t} · ${s}">${absArt(90+i*3,c).replace('<svg','<svg class="art"')}<span class="cap"><small style="color:${c[0]}">${s}</small><b>${t}</b></span></button>`).join('');
-const HL=[['Yangi Ijro',PAL[0]],['Top 100',PAL[1]],['AI',PAL[2]],['Radio',PAL[3]],['Concerts',PAL[4]]];
-$('#highlights').innerHTML=HL.map(([t,c],i)=>`<button class="hl-it" data-toast="${t} highlight"><span class="c"><span>${absArt(200+i,c)}</span></span><span>${t}</span></button>`).join('');
+  IG.map(p=>`<button class="tile" data-toast="Not part of this demo"><img src="${p.src}" alt="" loading="lazy">${p.reel?REEL:''}</button>`).join('');
+const HL=[['qo’shiling','highlight1'],['biz haqimizda','highlight2'],['obuna bo‘lish','highlight3']];
+$('#highlights').innerHTML=HL.map(([t,f])=>`<button class="hl-it" data-toast="${t}"><span class="c"><span><img src="media/instagram/${f}.jpg" alt=""></span></span><span>${t}</span></button>`).join('');
 
 /* Search: typed live, results filter as you type */
-const ACC=[{k:'riitm.uz',acc:'riitm',html:`<span class="av ring"><img src="icon.svg" alt=""></span><span><b>riitm.uz <span class="vf"></span></b><small>riitm · Music streaming app · 52.4K followers</small></span>`},
+const ACC=[{k:'riitm.uz',acc:'riitm',html:`<span class="av ring"><img src="media/instagram/avatar.jpg" alt=""></span><span><b>riitm.uz <span class="vf"></span></b><small>riitm · 8,568 followers</small></span>`},
   {k:'#riitm',html:`<span class="hash">#</span><span><b>#riitm</b><small>12.4K posts</small></span>`},
   {k:'#yangiijro riitm',html:`<span class="hash">#</span><span><b>#yangiijro</b><small>3,108 posts</small></span>`},
   {k:'kerak emas riitm',html:`<span class="hash"><svg class="ico" viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg></span><span><b>Kerak emas (cover)</b><small>Shukur Fazo &amp; Shaxriyor · Audio</small></span>`}];

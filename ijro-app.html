@@ -140,7 +140,7 @@ body.leaving .app{animation:leave .42s var(--ease) forwards}
 .trk{display:flex;align-items:center;gap:12px;width:100%;height:60px;text-align:left;border-radius:12px;transition:background .2s}
 .trk:hover{background:rgba(255,255,255,.03)}
 .trk .th{width:46px;height:46px;border-radius:9px;overflow:hidden;flex:none}
-.trk .th svg{width:100%;height:100%}
+.trk .th img{width:100%;height:100%;object-fit:cover;display:block}
 .trk span:nth-child(2){flex:1;min-width:0}
 .trk b{display:block;font:500 15px var(--fb);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .trk small{display:block;margin-top:3px;font:500 11.5px var(--fb);letter-spacing:.03em;text-transform:uppercase;color:var(--muted)}
@@ -165,8 +165,6 @@ body.leaving .app{animation:leave .42s var(--ease) forwards}
 .pl .pc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 15%}
 .pl .pc::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
 .pl.feat .pc::after{box-shadow:inset 0 0 0 3px var(--lime)}
-.pl.found .pc{box-shadow:0 0 0 4px rgba(182,255,56,.18),0 16px 40px -10px rgba(182,255,56,.6);animation:found 1.3s ease-in-out infinite}
-@keyframes found{50%{box-shadow:0 0 0 8px rgba(182,255,56,.08),0 16px 44px -8px rgba(182,255,56,.8)}}
 .pl .pt{position:absolute;left:0;right:0;bottom:12px;z-index:2;text-align:center;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.6)}
 .pl .pt small{display:block;font:700 13px var(--fd);font-stretch:108%;letter-spacing:.01em;color:var(--lime)}
 .pl .pt b{display:block;font:800 21px/1 var(--fd);font-stretch:110%}
@@ -179,9 +177,9 @@ body.leaving .app{animation:leave .42s var(--ease) forwards}
 .recs{padding:0 6px 0 20px}
 .rec{display:flex;align-items:center;gap:13px;width:100%;height:68px;text-align:left}
 .rec .th{width:54px;height:54px;border-radius:10px;overflow:hidden;flex:none}
-.rec .th svg{width:100%;height:100%}
+.rec .th img{width:100%;height:100%;object-fit:cover;display:block}
 .rec span:nth-child(2){flex:1;min-width:0}
-.rec b{display:block;font:500 15.5px var(--fb)}
+.rec span:nth-child(2) b{display:block;font:500 15.5px var(--fb);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rec small{display:block;margin-top:3px;font:400 13px var(--fb);color:var(--muted)}
 
 /* Mini player + tab bar */
@@ -295,8 +293,7 @@ body.leaving .app{animation:leave .42s var(--ease) forwards}
     <a href="ijro.html?at=profile" data-step="2"><span class="n">02</span>riitm.uz</a>
     <a href="ijro.html?at=post" data-step="3"><span class="n">03</span>Teaser</a>
     <a href="ijro-app.html?launch=1" data-step="4"><span class="n">04</span>riitm</a>
-    <a href="ijro-app.html?at=foryou" data-step="5"><span class="n">05</span>Playlist</a>
-    <a href="ijro-player.html" data-step="6"><span class="n">06</span>Play</a>
+    <a href="ijro-player.html" data-step="5"><span class="n">05</span>Play</a>
     <span class="sep"></span>
     <button id="restartBtn"><svg class="ico" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>Restart demo</button>
     <button id="fsBtn"><svg class="ico" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>Fullscreen</button>
@@ -443,18 +440,16 @@ const IC={
 Track.init();
 const sc=$('#scroll'),logoSvg=()=>`<svg viewBox="0 0 411 99" fill="none">${$('.logo svg').innerHTML}</svg>`;
 
-/* Covers: generated art (brand + secondary palette) for everything that isn't the Yangi Ijro photo */
-function miniCover(seed,c){const R=rng(seed);let d='';
-  for(let i=0;i<3;i++){let p=`M0 100 L0 ${55+i*14}`;const ph=R()*6;for(let x=0;x<=100;x+=5)p+=` L${x} ${(55+i*14+Math.sin(x/16+ph)*7).toFixed(1)}`;d+=`<path d="${p} L100 100Z" fill="${c[i+1]}" opacity="${(.9-i*.15).toFixed(2)}"/>`}
-  return `<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice"><rect width="100" height="100" fill="${c[0]}"/><circle cx="${30+R()*40}" cy="${28+R()*10}" r="${12+R()*8}" fill="${c[4]||'#B6FF38'}" opacity=".9"/>${d}</svg>`}
+/* Playlist tiles: generated art (brand + secondary palette); the Yangi Ijro tile uses the photo */
 function bigArt(seed,c,kind){const R=rng(seed);let s='';
   if(kind==='rings')for(let i=0;i<7;i++)s+=`<circle cx="${110+R()*10}" cy="${40+R()*10}" r="${18+i*16}" fill="none" stroke="#fff" stroke-opacity="${(.32-i*.04).toFixed(2)}" stroke-width="${(1+R()*2).toFixed(1)}"/>`;
   else for(let i=0;i<6;i++){let d=`M-10 ${30+i*10}`;for(let x=0;x<=170;x+=10)d+=` L${x} ${(30+i*10+Math.sin(x/22+i*.9)*(8+i*1.5)).toFixed(1)}`;s+=`<path d="${d}" fill="none" stroke="${i%2?c[2]:'#fff'}" stroke-opacity="${(.55-i*.06).toFixed(2)}" stroke-width="${(5-i*.5).toFixed(1)}" stroke-linecap="round"/>`}
   return `<svg class="bg" viewBox="0 0 150 150" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="g${seed}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c[0]}"/><stop offset="1" stop-color="${c[1]}"/></linearGradient></defs><rect width="150" height="150" fill="url(#g${seed})"/>${s}</svg>`}
 
-const TRACKS=[['Business','Shaxlo',['#1a1d26','#FF3D75','#8A03FF','#000B1C','#DBF717']],['Горячая линия','Cream Soda, Лауд',['#04122e','#0062FF','#00FCDF','#000B1C','#FF00CC']],['San','Shaxlo',['#2a0c05','#FF7300','#FF3D3D','#1a0a05','#FFD54A']]];
+// Real releases with their official artwork (iTunes Search API, saved to covers/)
+const TRACKS=[['Горячая линия','Cream Soda, Лауд','cream-soda-laud-goryachaya-liniya'],['O‘ylamading','Munisa Rizayeva, Konsta','munisa-rizayeva-konsta-o-ylamading'],['Ket','Shakhzoda, Shoxrux','shakhzoda-shoxrux-ket']];
 const KEB='<span class="kebab"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5.5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="18.5" r="1.6"/></svg></span>';
-$('#trackList').innerHTML=TRACKS.map(([t,a,c],i)=>`<button class="trk" data-toast="“${t}” isn't in this preview — try Kerak emas"><span class="th">${miniCover(11+i,c)}</span><span><b>${t}</b><small>${a}</small></span>${KEB}</button>`).join('');
+$('#trackList').innerHTML=TRACKS.map(([t,a,f])=>`<button class="trk" data-toast="“${t}” isn't in this preview — try Kerak emas"><span class="th"><img src="covers/${f}.jpg" alt=""></span><span><b>${t}</b><small>${a}</small></span>${KEB}</button>`).join('');
 
 const PLS=[
   {t:'Top 100<br>Uzbekistan',name:'Top 100<br>Uzbekistan',art:bigArt(3,['#FF3D75','#8A03FF','#FF00CC'],'rings'),lbl:'left'},
@@ -464,8 +459,9 @@ const PLS=[
 $('#pls').innerHTML=PLS.map(p=>p.yi
   ?`<button class="pl feat" id="yiPl"><span class="pc yi"><img src="${TRACK.cover}" alt=""><span class="pt"><small>riitmda</small><b>Yangi Ijro</b><span class="lg">${logoSvg()}</span></span></span><span>${p.name}</span></button>`
   :`<button class="pl" data-toast="${p.name.replace('<br>',' ')} · playlist"><span class="pc">${p.art}<span class="pt ${p.lbl==='left'?'left':''}"><b style="${p.lbl==='trend'?'color:var(--lime)':''}">${p.t}</b></span></span><span>${p.name}</span></button>`).join('');
-const RECS=[['Vibe check',['#2b0f3a','#FF3D75','#8A03FF','#000B1C','#FFD54A']],['Uzbek Pop Hits',['#3a2a05','#FFD54A','#FF7300','#2a0c05','#fff']],['Chill & Focus',['#04122e','#0062FF','#00FCDF','#000B1C','#B6FF38']],['Late Night Drive',['#0b0c10','#8A03FF','#0062FF','#000B1C','#FF00CC']],['Workout Energy',['#0d1f0a','#3DFF5D','#9DFF00','#000B1C','#fff']]];
-$('#recs').innerHTML=RECS.map(([t,c],i)=>`<button class="rec" data-toast="${t.replace('&','&amp;')} · playlist"><span class="th">${miniCover(31+i,c)}</span><span><b>${t.replace('&','&amp;')}</b><small>Playlist • riitm</small></span>${KEB}</button>`).join('');
+const RECS=[['Yomg‘ir','Shakhzoda','shakhzoda-yomg-ir'],['Прятки','HammAli & Navai','hammali-navai-pryatki'],['Setoram','Jaloliddin Ahmadaliyev','jaloliddin-ahmadaliyev-setoram'],
+  ['Asragin meni','Konsta & Sevara Nazarkhan','konsta-sevara-nazarkhan-asragin-meni'],['Salom Sevgi','Shohruhxon','shohruhxon-salom-sevgi'],['Ko‘k Jiguli','Ozoda','ozoda-ko-k-jiguli']];
+$('#recs').innerHTML=RECS.map(([t,a,f])=>`<button class="rec" data-toast="“${t}” isn't in this preview — try Kerak emas"><span class="th"><img src="covers/${f}.jpg" alt="" loading="lazy"></span><span><b>${t}</b><small>Single • ${a.replace('&','&amp;')}</small></span>${KEB}</button>`).join('');
 
 /* Controls */
 $('#app').addEventListener('click',e=>{const t=e.target.closest('[data-toast]');if(t)toast(t.dataset.toast)});
@@ -497,10 +493,6 @@ if(NP.playing)Track.play();
 /* Status-bar shade once the hero has scrolled away */
 sc.addEventListener('scroll',()=>$('#sbShade').classList.toggle('on',sc.scrollTop>$('#hero').offsetHeight-90),{passive:true});
 
-/* Smooth scroll with our own easing so the tour has a known duration */
-function glide(el,to,ms){return new Promise(res=>{const from=el.scrollTop,t0=performance.now(),e=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
-  const fallback=setTimeout(()=>{el.scrollTop=to;res()},ms+400);
-  (function step(now){const k=Math.min(1,(now-t0)/ms);el.scrollTop=from+(to-from)*e(k);if(k<1)requestAnimationFrame(step);else{clearTimeout(fallback);res()}})(t0)})}
 const forYouTop=()=>$('#foryou').offsetTop-(matchMedia('(max-width:520px)').matches?0:34);
 
 /* Launch splash (arriving from Instagram) */
@@ -510,17 +502,12 @@ async function splash(){const s=$('#splash');s.hidden=false;
 
 async function tour(){
   markStep(4);
-  await W(params.get('launch')?2300:1400);
-  markStep(5);
-  await glide(sc,forYouTop(),1300);
-  await W(700);
-  const pl=$('#yiPl'),row=$('#pls');row.scrollTo({left:Math.max(0,pl.offsetLeft-row.offsetWidth/2+pl.offsetWidth/2),behavior:'smooth'});
-  await W(500);pl.classList.add('found');
-  await W(1700);
-  tapFx(pl);await W(260);pl.classList.remove('found');openPlayer(false)}
+  await W(params.get('launch')?2600:1600);
+  const b=$('#heroPlay');tapFx(b);ripple(b);await W(320);openPlayer(true)}
 
 const AT=params.get('at');
-if(AT==='foryou'){sc.scrollTop=forYouTop();markStep(5)}else markStep(4);
+if(AT==='foryou')sc.scrollTop=forYouTop();
+markStep(4);
 if(params.get('launch')&&!matchMedia('(prefers-reduced-motion:reduce)').matches)splash();
 if(Demo.active()&&!NP.playing){store.set('demo',true);Demo.run(tour)}
 
