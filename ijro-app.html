@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0C10">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Riitm">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>riitm — Yangi Ijro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ───────── Shared tokens & device frame (identical in every page) ───────── */
+:root{
+  --bg:#0B0C10; --card:#14161D; --card-2:#1A1D26; --field:#0F1116;
+  --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.14);
+  --text:#F4F6F8; --muted:#8C93A1; --dim:#5D6370;
+  --lime:#B6FF38; --lime-brand:#9DFF00; --blue:#0062FF; --ink:#000B1C;
+  --fb:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --fd:'Archivo','Inter',system-ui,sans-serif;   /* stand-in for Halvar Breitschrift: use with font-stretch:108–125% */
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{background:#0B0C10}
+body{height:100vh;height:100dvh;overflow:hidden;font-family:var(--fb);color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{color:inherit}
+svg{display:block}
+.stage{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+.stage-bg{position:fixed;inset:0;z-index:0;overflow:hidden}
+.stage-bg canvas{display:block;width:100%;height:100%}
+.stage-bg::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 34% 55% at 50% 48%,rgba(11,12,16,.6),rgba(11,12,16,0) 75%)}
+.device-wrap{position:relative;z-index:1;width:410px;height:864px;flex:none}
+.device{position:absolute;left:0;top:0;width:410px;height:864px;padding:10px;border-radius:60px;
+  background:linear-gradient(150deg,#3b3e47,#121318 28%,#0a0b0e 70%,#2b2e36);
+  box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.08),0 50px 120px -30px rgba(0,0,0,.9),0 0 0 1px #000;
+  transform:scale(var(--scale,1));transform-origin:0 0}
+.screen{position:relative;width:100%;height:100%;border-radius:50px;overflow:hidden;background:var(--bg);isolation:isolate}
+.app{position:absolute;inset:0;display:flex;flex-direction:column}
+.statusbar{flex:none;height:50px;padding:17px 30px 0 38px;display:flex;justify-content:space-between;font:600 15px var(--fb);letter-spacing:-.01em;position:relative;z-index:5}
+.statusbar .sys{display:flex;gap:6px;align-items:center}
+.homebar{position:absolute;bottom:8px;left:50%;width:134px;height:5px;border-radius:3px;background:rgba(255,255,255,.85);transform:translateX(-50%);z-index:60;pointer-events:none}
+.hdr{flex:none;height:56px;padding:0 22px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:5}
+.logo{display:block;height:26px}
+.logo svg{height:26px;width:auto}
+.icon-btn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line-2);background:rgba(255,255,255,.03);transition:background .2s,transform .2s var(--ease)}
+.icon-btn:hover{background:rgba(255,255,255,.07)}
+.icon-btn:active{transform:scale(.92)}
+.icon-btn svg{width:19px;height:19px}
+.ico{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.toolbar{position:relative;z-index:2;display:flex;align-items:center;gap:4px;max-width:calc(100vw - 24px);overflow-x:auto;scrollbar-width:none;padding:5px;border-radius:999px;background:rgba(11,12,16,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line)}
+.toolbar a,.toolbar button{height:34px;padding:0 14px;border-radius:999px;display:inline-flex;align-items:center;gap:7px;font:500 12.5px var(--fb);color:var(--muted);text-decoration:none;transition:color .2s,background .2s;white-space:nowrap}
+.toolbar a:hover,.toolbar button:hover{color:var(--text);background:rgba(255,255,255,.06)}
+.toolbar a.on{background:var(--lime);color:#0B0C10}
+.toolbar .n{font-variant-numeric:tabular-nums;opacity:.55}
+.toolbar .sep{width:1px;height:18px;background:var(--line-2);margin:0 4px}
+.toolbar svg{width:15px;height:15px}
+.toast{position:absolute;left:50%;bottom:112px;z-index:70;transform:translate(-50%,16px);opacity:0;pointer-events:none;display:flex;align-items:center;gap:10px;max-width:86%;
+  padding:11px 16px;border-radius:16px;background:rgba(26,29,38,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line-2);font:500 13px var(--fb);
+  box-shadow:0 18px 40px -12px rgba(0,0,0,.7);transition:opacity .3s,transform .4s var(--ease)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast i{width:8px;height:8px;border-radius:50%;background:var(--lime);box-shadow:0 0 10px var(--lime);flex:none}
+.reveal{animation:rise .8s var(--ease) both;animation-delay:calc(var(--d,0) * 75ms + 60ms)}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}}
+body.leaving .app{animation:leave .42s var(--ease) forwards}
+@keyframes leave{to{opacity:0;transform:scale(.965);filter:blur(6px)}}
+@keyframes waveSlide{to{transform:translateX(var(--p))}}
+.scroll{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+@media (max-width:520px){
+  .stage{display:block}
+  .stage-bg,.toolbar,.statusbar,.homebar{display:none}
+  .device-wrap{width:100%!important;height:100%!important}
+  .device{width:100%;height:100%;padding:0;border-radius:0;background:none;box-shadow:none;transform:none}
+  .screen{border-radius:0}
+  .app{padding-top:max(env(safe-area-inset-top),8px);padding-bottom:env(safe-area-inset-bottom)}
+}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* ───────── This page ───────── */
+/* ───────── Yangi Ijro shared ───────── */
+*{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:3px}
+::-webkit-scrollbar-button{display:none;width:0;height:0}
+.toolbar .demos{color:var(--text)}
+:root{--sbh:50px}
+@media (max-width:520px){:root{--sbh:0px}}
+.tap{transform:scale(.93)!important;transition:transform .12s!important}
+.ripple{position:absolute;border-radius:50%;background:rgba(11,12,16,.22);transform:scale(0);animation:ripple .7s var(--ease) forwards;pointer-events:none}
+@keyframes ripple{to{transform:scale(1);opacity:0}}
+.ghost{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;transition:background .2s,transform .2s var(--ease)}
+.ghost:hover{background:rgba(255,255,255,.07)}
+.ghost:active{transform:scale(.9)}
+.ghost svg{width:23px;height:23px}
+.hide-x{scrollbar-width:none}.hide-x::-webkit-scrollbar{display:none}
+/* Heart: outline → filled red */
+.lk svg{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round;transition:transform .3s var(--ease)}
+.lk.on{color:#FF3D57}.lk.on svg{fill:currentColor;animation:pop .4s var(--ease)}
+@keyframes pop{40%{transform:scale(1.3)}}
+.toast{bottom:150px}
+
+/* ───── riitm home: artist hero → For you → playlists ───── */
+.statusbar{position:absolute;left:0;right:0;top:0}
+.sb-shade{position:absolute;left:0;right:0;top:0;height:var(--sbh);z-index:4;background:var(--bg);opacity:0;transition:opacity .25s;pointer-events:none}
+.sb-shade.on{opacity:1}
+.hero{position:relative;height:calc(452px + var(--sbh));padding-top:var(--sbh);display:flex;flex-direction:column;overflow:hidden}
+.hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 12%;transform-origin:50% 30%;animation:heroIn 1.4s var(--ease) both}
+@keyframes heroIn{from{transform:scale(1.08);opacity:0}}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(11,12,16,.55),rgba(11,12,16,0) 22%,rgba(11,12,16,0) 46%,rgba(11,12,16,.82) 78%,var(--bg))}
+.hero>*:not(img){position:relative;z-index:2}
+.hero-hdr{padding:0 8px 0 20px}
+.hero-hdr .logo,.hero-hdr .logo svg{height:24px}
+.hh-ic{display:flex}
+.hh-ic .ghost{position:relative}
+.hh-ic svg{width:22px;height:22px}
+.nd{position:absolute;top:9px;right:10px;width:7px;height:7px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 2px rgba(11,12,16,.6)}
+.hero-txt{margin-top:auto;padding:0 20px 22px}
+.hero h1{font:800 19.5px/1.1 var(--fd);font-stretch:104%;white-space:nowrap;text-transform:uppercase;letter-spacing:-.005em;text-shadow:0 2px 16px rgba(0,0,0,.5)}
+.hero p{margin-top:5px;font:400 16px var(--fb);color:#E6E9EE}
+.hero-act{display:flex;align-items:center;gap:12px;margin-top:18px}
+.play-pill{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:9px;width:146px;height:50px;border-radius:999px;background:var(--lime);color:#0B0C10;font:600 17px var(--fb);
+  box-shadow:0 12px 30px -12px rgba(182,255,56,.8);transition:transform .25s var(--ease)}
+.play-pill:active{transform:scale(.95)}
+.play-pill .pp-i svg{width:20px;height:20px}
+.rb{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:transform .2s var(--ease),background .2s}
+.rb:hover{background:rgba(255,255,255,.16)}
+.rb:active{transform:scale(.9)}
+.rb svg{width:22px;height:22px}
+.rb.done{color:var(--lime)}
+
+.tracks{margin:6px 12px 0;padding:16px 8px 6px 16px;border-radius:22px;background:var(--card);border:1px solid var(--line)}
+.tracks h3{font:700 18px var(--fb);margin-bottom:8px}
+.trk{display:flex;align-items:center;gap:12px;width:100%;height:60px;text-align:left;border-radius:12px;transition:background .2s}
+.trk:hover{background:rgba(255,255,255,.03)}
+.trk .th{width:46px;height:46px;border-radius:9px;overflow:hidden;flex:none}
+.trk .th svg{width:100%;height:100%}
+.trk span:nth-child(2){flex:1;min-width:0}
+.trk b{display:block;font:500 15px var(--fb);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trk small{display:block;margin-top:3px;font:500 11.5px var(--fb);letter-spacing:.03em;text-transform:uppercase;color:var(--muted)}
+.kebab{width:36px;height:40px;display:grid;place-items:center;color:var(--muted);flex:none}
+.kebab svg{width:20px;height:20px}
+
+.foryou{padding:26px 0 20px}
+.foryou h2{padding:0 20px;font:800 30px var(--fd);font-stretch:108%;letter-spacing:-.01em}
+.chips{display:flex;gap:8px;padding:14px 20px 4px;overflow-x:auto;-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}
+.chip{flex:none;height:36px;padding:0 15px;border-radius:999px;background:var(--card-2);border:1px solid var(--line);font:500 13.5px var(--fb);color:#DDE1E8;transition:background .25s,color .25s,transform .2s var(--ease)}
+.chip:active{transform:scale(.94)}
+.chip.on{background:var(--lime);color:#0B0C10;border-color:var(--lime);box-shadow:0 6px 18px -8px rgba(182,255,56,.8)}
+.sec-h{display:flex;align-items:center;justify-content:space-between;padding:22px 14px 12px 20px}
+.sec-h b{font:700 18px var(--fb)}
+.see{display:flex;align-items:center;gap:2px;font:500 13.5px var(--fb);color:var(--muted);padding:6px}
+.see svg{width:15px;height:15px}
+.pls{display:flex;gap:12px;padding:4px 20px 6px;overflow-x:auto}
+.pl{flex:none;width:150px;text-align:left}
+.pl .pc{position:relative;display:block;width:150px;height:150px;border-radius:14px;overflow:hidden;transition:transform .3s var(--ease),box-shadow .4s}
+.pl:active .pc{transform:scale(.96)}
+.pl .pc svg.bg{position:absolute;inset:0;width:100%;height:100%}
+.pl .pc img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 15%}
+.pl .pc::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
+.pl.feat .pc::after{box-shadow:inset 0 0 0 3px var(--lime)}
+.pl.found .pc{box-shadow:0 0 0 4px rgba(182,255,56,.18),0 16px 40px -10px rgba(182,255,56,.6);animation:found 1.3s ease-in-out infinite}
+@keyframes found{50%{box-shadow:0 0 0 8px rgba(182,255,56,.08),0 16px 44px -8px rgba(182,255,56,.8)}}
+.pl .pt{position:absolute;left:0;right:0;bottom:12px;z-index:2;text-align:center;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.6)}
+.pl .pt small{display:block;font:700 13px var(--fd);font-stretch:108%;letter-spacing:.01em;color:var(--lime)}
+.pl .pt b{display:block;font:800 21px/1 var(--fd);font-stretch:110%}
+.pl .pt .lg{display:block;height:10px;margin:6px auto 0}
+.pl .pt .lg svg{height:10px;width:auto;margin:0 auto}
+.pl .pt.left{left:10px;right:10px;text-align:left;bottom:auto;top:56%}
+.pl .pc.yi::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(rgba(0,0,0,0) 35%,rgba(0,0,0,.72))}
+.pl>span:last-child{display:block;margin-top:9px;font:500 14px/1.3 var(--fb);color:#E6E9EE}
+.pl>span:last-child b{font-weight:600;color:#fff}
+.recs{padding:0 6px 0 20px}
+.rec{display:flex;align-items:center;gap:13px;width:100%;height:68px;text-align:left}
+.rec .th{width:54px;height:54px;border-radius:10px;overflow:hidden;flex:none}
+.rec .th svg{width:100%;height:100%}
+.rec span:nth-child(2){flex:1;min-width:0}
+.rec b{display:block;font:500 15.5px var(--fb)}
+.rec small{display:block;margin-top:3px;font:400 13px var(--fb);color:var(--muted)}
+
+/* Mini player + tab bar */
+.mini{flex:none;position:relative;z-index:6;display:flex;align-items:center;gap:8px;height:60px;padding:0 10px;background:#111318;border-top:1px solid var(--line)}
+.mini-prog{position:absolute;left:0;top:-1px;height:2px;width:0;background:var(--lime);box-shadow:0 0 8px rgba(182,255,56,.7)}
+.mini-like{width:42px;height:42px;display:grid;place-items:center;flex:none;color:#C9CED6}
+.mini-like svg{width:24px;height:24px}
+.mini-txt{flex:1;min-width:0;text-align:left}
+.mini-txt b{display:block;font:600 14.5px var(--fb);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini-txt small{display:block;margin-top:2px;font:400 12.5px var(--fb);color:var(--muted)}
+.mini-pp{width:46px;height:46px;display:grid;place-items:center;border-radius:50%;flex:none;transition:transform .2s var(--ease),background .2s}
+.mini-pp:hover{background:rgba(255,255,255,.07)}
+.mini-pp:active{transform:scale(.88)}
+.mini-pp svg{width:26px;height:26px}
+.tabbar{flex:none;display:flex;justify-content:space-around;padding:8px 6px 26px;background:rgba(11,12,16,.97);position:relative;z-index:6}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;width:86px;font:500 11.5px var(--fb);color:#C9CED6;transition:color .2s}
+.tab svg{width:25px;height:25px}
+.tab .ti{height:30px;display:grid;place-items:center}
+.tab.on{color:var(--lime)}
+@media (max-width:520px){.tabbar{padding-bottom:max(12px,env(safe-area-inset-bottom))}}
+
+/* App launch splash */
+.splash{position:absolute;inset:0;z-index:90;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);transition:opacity .5s,visibility 0s .5s}
+.splash .logo,.splash .logo svg{height:46px}
+.splash .logo{animation:splashIn .9s var(--ease) both}
+@keyframes splashIn{from{opacity:0;transform:scale(.86)}}
+.splash-wave{position:absolute;left:0;right:0;top:calc(50% + 50px);height:120px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 15%,#000 85%,transparent);mask-image:linear-gradient(90deg,transparent,#000 15%,#000 85%,transparent)}
+.splash-wave canvas{width:100%;height:100%;display:block}
+.splash.out{opacity:0;visibility:hidden}
+.splash[hidden],.hear[hidden]{display:none}
+
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="stage-bg" aria-hidden="true"><canvas id="bgWave"></canvas></div>
+
+  <div class="device-wrap" id="wrap"><div class="device" id="device"><div class="screen">
+    <div class="app" id="app">
+      <div class="statusbar"><span id="clock">9:41</span><span class="sys">
+        <svg width="18" height="11" viewBox="0 0 18 11" fill="#fff"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="6" rx="1"/><rect x="10" y="2.5" width="3" height="8.5" rx="1"/><rect x="15" y="0" width="3" height="11" rx="1"/></svg>
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="#fff"><path d="M8 2.2c2.3 0 4.4.9 6 2.4l1.2-1.3A10.4 10.4 0 0 0 8 .4 10.4 10.4 0 0 0 .8 3.3L2 4.6a8.6 8.6 0 0 1 6-2.4zm0 3.4c1.4 0 2.6.5 3.6 1.4l1.2-1.3A7 7 0 0 0 8 3.8a7 7 0 0 0-4.8 1.9L4.4 7c1-.9 2.2-1.4 3.6-1.4zM8 9a1.7 1.7 0 0 0-1.2.5L8 10.8l1.2-1.3A1.7 1.7 0 0 0 8 9z"/></svg>
+        <svg width="27" height="13" viewBox="0 0 27 13"><rect x=".5" y=".5" width="23" height="12" rx="3.5" fill="none" stroke="#fff" opacity=".4"/><rect x="2" y="2" width="20" height="9" rx="2" fill="#fff"/><rect x="25" y="4.5" width="1.6" height="4" rx=".8" fill="#fff" opacity=".45"/></svg>
+      </span></div>
+
+      <div class="sb-shade" id="sbShade" aria-hidden="true"></div>
+      <main class="scroll" id="scroll">
+        <section class="hero" id="hero">
+          <img class="hero-img" src="media/yangi-ijro-cover.jpg" alt="Shukur Fazo and Shaxriyor in the studio">
+          <header class="hdr hero-hdr reveal" style="--d:0">
+            <a class="logo" href="index.html" aria-label="riitm"><svg viewBox="0 0 411 99" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M174.963 22.3626V31.5696H162.846C158.876 31.5696 155.372 32.2296 152.32 33.5386C149.269 34.8586 146.903 36.7176 145.211 39.1266V76.6256H134.63V22.3626H144.548L144.879 28.6106C147.301 26.5646 150.164 25.0136 153.47 23.9466C156.776 22.8906 160.369 22.3516 164.272 22.3516H174.963V22.3626Z" fill="white"/><path d="M186.871 11.671C185.544 10.395 184.892 8.734 184.892 6.688C184.892 4.642 185.555 3.113 186.871 1.859C188.197 0.616 189.922 0 192.045 0C194.168 0 195.904 0.627 197.219 1.859C198.546 3.102 199.198 4.708 199.198 6.688C199.198 8.668 198.535 10.395 197.219 11.671C195.892 12.947 194.168 13.585 192.045 13.585C189.922 13.585 188.186 12.947 186.871 11.671ZM197.341 22.363V76.637H186.76V22.363H197.341Z" fill="white"/><path d="M218.38 11.671C217.054 10.395 216.401 8.734 216.401 6.688C216.401 4.642 217.065 3.113 218.38 1.859C219.707 0.616 221.432 0 223.555 0C225.677 0 227.413 0.627 228.729 1.859C230.056 3.102 230.708 4.708 230.708 6.688C230.708 8.668 230.045 10.395 228.729 11.671C227.402 12.947 225.677 13.585 223.555 13.585C221.432 13.585 219.696 12.947 218.38 11.671ZM228.851 22.363V76.637H218.27V22.363H228.851Z" fill="white"/><path d="M270.178 31.5691V58.9811C270.178 61.6871 270.952 63.7551 272.489 65.1741C274.037 66.6041 276.193 67.3081 278.99 67.3081H291.992V76.6251H278.105C272.378 76.6251 267.879 75.0851 264.606 72.0161C261.333 68.9471 259.697 64.7121 259.697 59.3001V31.5581H239.31V22.3511H256.723C257.972 22.3511 258.813 22.1201 259.255 21.6361C259.697 21.1631 259.918 20.3381 259.918 19.1721V7.78711H270.167V22.3731H295.287V31.5801H270.167L270.178 31.5691Z" fill="white"/><path d="M403.946 28.1167C408.645 32.8357 411 39.6447 411 48.5657V76.6377H400.42V48.5657C400.42 42.7907 398.916 38.3687 395.898 35.2997C392.879 32.2307 388.59 30.6907 383.006 30.6907C378.75 30.6907 374.792 31.7137 371.165 33.7597C367.528 35.8057 364.753 38.5117 362.851 41.8777C363.216 44.2207 363.404 46.4427 363.404 48.5657V76.6377H352.934V48.5657C352.934 42.8677 351.43 38.4677 348.412 35.3547C345.393 32.2527 341.104 30.6907 335.52 30.6907C331.264 30.6907 327.361 31.6917 323.845 33.7047C320.318 35.7177 317.676 38.4017 315.907 41.7677V76.6267H305.437V22.3637H315.243L315.575 29.3817C318.217 26.6757 321.324 24.6077 324.884 23.1887C328.444 21.7587 332.325 21.0547 336.504 21.0547C341.944 21.0547 346.609 21.9897 350.501 23.8487C354.393 25.7077 357.4 28.4357 359.534 32.0217C362.398 28.5127 365.869 25.8067 369.949 23.9037C374.029 22.0007 378.562 21.0547 383.559 21.0547C392.448 21.0547 399.248 23.4087 403.946 28.1277V28.1167Z" fill="white"/><path d="M0.12207 23.463L35.8112 47.663L99.2733 21.714C98.7426 15.312 97.1948 10.23 93.2588 6.314C87.8966 1.023 80.4779 0 70.6601 0H54.5071L15.2137 1.364C11.7752 2.31 8.80112 3.861 6.30244 6.347C1.94633 10.648 0.497978 16.346 0.12207 23.463Z" fill="#9DFF00"/><path d="M17.8006 53.2844L0.199219 76.7364C0.674632 83.4024 2.17826 88.6604 6.25797 92.6864C6.88817 93.3024 7.54048 93.8634 8.22596 94.3694L33.1133 99.0004C33.1133 99.0004 73.8329 98.9674 75.3145 98.9014L99.2731 77.1874C99.45 75.0424 99.5052 72.7544 99.5052 70.3014V61.0504L17.8006 53.2734V53.2844Z" fill="#9DFF00"/><path d="M35.8002 32.373C41.472 32.373 47.9177 17.435 54.5071 0H28.5363C23.5168 0 19.0723 0.297 15.2026 1.364C16.0318 2.783 16.8389 4.224 17.6239 5.654C24.921 19.008 30.3937 32.373 35.8002 32.373Z" fill="#0062FF"/><path d="M75.3145 98.9015C82.8768 98.5495 88.814 97.1085 93.2475 92.6865C97.2056 88.7155 98.7424 83.6225 99.2731 77.1875C88.5155 77.4625 80.9752 86.8565 75.3145 98.9015Z" fill="#0062FF"/><path d="M19.2046 82.082C14.5832 82.082 11.1447 87.439 8.21484 94.38C13.378 98.208 20.1665 99.011 28.8345 99.011H33.1022C29.0114 89.265 24.4452 82.093 19.2046 82.093V82.082Z" fill="#0062FF"/><path d="M35.7997 49.4997L99.505 29.1387V28.6877C99.505 26.2017 99.4387 23.8807 99.2618 21.7027C93.0151 14.7837 87.0006 8.72266 81.2182 8.72266C74.3966 8.72266 66.4583 17.3357 58.509 25.9487C50.5596 34.5617 42.6213 43.1747 35.7997 43.1747C30.3933 43.1747 24.9315 37.8507 17.6234 32.5157C12.7809 28.9737 7.10908 25.4317 0.121617 23.4627C0.0331683 25.0357 0 26.6857 0 28.4017V30.2277L35.7997 49.5107V49.4997Z" fill="#000B1C"/><path d="M19.2045 51.4805C19.2045 51.4805 0 70.3015 0 70.2245V70.3125C0 72.5895 0.0552806 74.7345 0.19901 76.7475C1.73581 75.2515 3.20627 73.4365 4.76519 71.6215C8.46898 67.3205 12.6482 63.0085 19.2045 63.0085C27.3749 63.0085 33.9091 69.9715 39.5698 76.9235C45.2306 83.8865 50.0179 90.8385 54.7167 90.8385C59.4156 90.8385 63.0199 83.3915 69.2223 75.9445C75.4027 68.5415 84.2144 61.1385 99.505 61.0505V58.3445L19.2045 51.4805Z" fill="#000B1C"/><path d="M35.8 49.929L99.5053 39.721V29.15C93.1812 23.892 87.0783 19.25 81.2185 19.25C74.3969 19.25 66.4586 25.685 58.5093 32.12C50.5599 38.555 42.6216 44.99 35.8 44.99C30.3936 44.99 24.9319 41.008 17.6238 37.026C12.748 34.364 7.04306 31.702 -0.0107422 30.228V40.26L35.789 49.929H35.8Z" fill="#0062FF"/><path d="M19.2045 59.8063C27.3749 59.8063 33.9091 65.0093 39.5698 70.2123C45.2306 75.4153 50.0179 80.6183 54.7167 80.6183C59.4156 80.6183 63.0199 75.0523 69.2223 69.4863C75.4027 63.9533 84.2144 58.4093 99.505 58.3543V54.3613H6.68895L0 60.3123V70.2233C1.60314 69.0793 3.13994 67.6603 4.76519 66.2523C8.46898 63.0293 12.6482 59.8173 19.2045 59.8173V59.8063Z" fill="#0062FF"/><path d="M19.2048 55.087C27.3753 55.087 33.9094 57.694 39.5701 60.301C45.2309 62.908 50.0182 65.515 54.717 65.515C59.4159 65.515 63.0202 62.721 69.2226 59.927C75.403 57.155 84.2147 54.372 99.5053 54.35V39.709C93.1812 37.069 87.0783 34.748 81.2185 34.748C74.3969 34.748 66.4586 37.971 58.5093 41.205C50.5599 44.428 42.6216 47.662 35.8 47.662C30.3936 47.662 24.9319 45.66 17.6238 43.669C12.748 42.338 7.04306 40.996 -0.0107422 40.259V60.312C1.59239 59.74 3.12919 59.025 4.75444 58.321C8.45824 56.704 12.6375 55.098 19.1937 55.098L19.2048 55.087Z" fill="white"/></svg></a>
+            <span class="hh-ic"><button class="ghost" id="bellBtn" aria-label="Notifications"><svg class="ico" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg><i class="nd"></i></button>
+            <button class="ghost" id="setBtn" aria-label="Settings"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></span>
+          </header>
+          <div class="hero-txt">
+            <h1 class="reveal" style="--d:1">Shukur Fazo &amp; Shaxriyor</h1>
+            <p class="reveal" style="--d:2">Kerak emas (cover)</p>
+            <div class="hero-act reveal" style="--d:3">
+              <button class="play-pill" id="heroPlay"><span class="pp-i"></span><span class="pp-t">Play</span></button>
+              <button class="rb" id="dlBtn" aria-label="Download"><svg class="ico" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/></svg></button>
+              <button class="rb lk" id="heroLike" aria-label="Like"></button>
+              <button class="rb" id="shareBtn" aria-label="Share"><svg class="ico" viewBox="0 0 24 24"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/><path d="M8 11H6.5A1.5 1.5 0 0 0 5 12.5v6A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5v-6a1.5 1.5 0 0 0-1.5-1.5H16"/></svg></button>
+            </div>
+          </div>
+        </section>
+
+        <section class="tracks reveal" style="--d:4">
+          <h3>Tracks</h3>
+          <div id="trackList"></div>
+        </section>
+
+        <section class="foryou" id="foryou">
+          <h2>For you</h2>
+          <div class="chips hide-x" id="chips">
+            <button class="chip on">All</button><button class="chip">Music</button><button class="chip">Podcasts</button><button class="chip">Mood</button><button class="chip">Genres</button>
+          </div>
+          <div class="sec-h"><b>Playlists for you</b><button class="see" data-toast="All playlists for you">See all<svg class="ico" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div>
+          <div class="pls hide-x" id="pls"></div>
+          <div class="sec-h"><b>Recommended for you</b><button class="see" data-toast="All recommendations">See all<svg class="ico" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></div>
+          <div class="recs" id="recs"></div>
+        </section>
+      </main>
+
+      <div class="mini" id="mini">
+        <i class="mini-prog" id="miniProg"></i>
+        <button class="mini-like lk" id="miniLike" aria-label="Like"></button>
+        <button class="mini-txt" id="miniTxt"><b>Kerak emas (cover)</b><small>Shukur Fazo &amp; Shaxriyor</small></button>
+        <button class="mini-pp" id="miniPP" aria-label="Play"></button>
+      </div>
+      <nav class="tabbar">
+        <button class="tab on" data-tab="Home"><span class="ti"><svg class="ico" viewBox="0 0 24 24"><path d="M2.5 8.5c2.4-2.6 4.6-2.6 7 0s4.6 2.6 7 0 3.5-1.3 5-1"/><path d="M2.5 13c2.4-2.6 4.6-2.6 7 0s4.6 2.6 7 0 3.5-1.3 5-1"/><path d="M2.5 17.5c2.4-2.6 4.6-2.6 7 0s4.6 2.6 7 0 3.5-1.3 5-1"/></svg></span>Home</button>
+        <button class="tab" data-tab="Search"><span class="ti"><svg class="ico" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg></span>Search</button>
+        <button class="tab" data-tab="Radio"><span class="ti"><svg class="ico" viewBox="0 0 24 24"><circle cx="12" cy="11" r="2"/><path d="M8.5 14.5a5 5 0 0 1 0-7M15.5 7.5a5 5 0 0 1 0 7M5.6 17.4a9 9 0 0 1 0-12.8M18.4 4.6a9 9 0 0 1 0 12.8M12 13v8"/></svg></span>Radio</button>
+        <button class="tab" data-tab="Media library"><span class="ti"><svg class="ico" viewBox="0 0 24 24"><rect x="7" y="3" width="14" height="14" rx="2"/><path d="M3 7v12a2 2 0 0 0 2 2h12"/></svg></span>Media library</button>
+      </nav>
+
+      <div class="splash" id="splash" hidden>
+        <a class="logo" href="index.html" aria-label="riitm"><svg viewBox="0 0 411 99" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M174.963 22.3626V31.5696H162.846C158.876 31.5696 155.372 32.2296 152.32 33.5386C149.269 34.8586 146.903 36.7176 145.211 39.1266V76.6256H134.63V22.3626H144.548L144.879 28.6106C147.301 26.5646 150.164 25.0136 153.47 23.9466C156.776 22.8906 160.369 22.3516 164.272 22.3516H174.963V22.3626Z" fill="white"/><path d="M186.871 11.671C185.544 10.395 184.892 8.734 184.892 6.688C184.892 4.642 185.555 3.113 186.871 1.859C188.197 0.616 189.922 0 192.045 0C194.168 0 195.904 0.627 197.219 1.859C198.546 3.102 199.198 4.708 199.198 6.688C199.198 8.668 198.535 10.395 197.219 11.671C195.892 12.947 194.168 13.585 192.045 13.585C189.922 13.585 188.186 12.947 186.871 11.671ZM197.341 22.363V76.637H186.76V22.363H197.341Z" fill="white"/><path d="M218.38 11.671C217.054 10.395 216.401 8.734 216.401 6.688C216.401 4.642 217.065 3.113 218.38 1.859C219.707 0.616 221.432 0 223.555 0C225.677 0 227.413 0.627 228.729 1.859C230.056 3.102 230.708 4.708 230.708 6.688C230.708 8.668 230.045 10.395 228.729 11.671C227.402 12.947 225.677 13.585 223.555 13.585C221.432 13.585 219.696 12.947 218.38 11.671ZM228.851 22.363V76.637H218.27V22.363H228.851Z" fill="white"/><path d="M270.178 31.5691V58.9811C270.178 61.6871 270.952 63.7551 272.489 65.1741C274.037 66.6041 276.193 67.3081 278.99 67.3081H291.992V76.6251H278.105C272.378 76.6251 267.879 75.0851 264.606 72.0161C261.333 68.9471 259.697 64.7121 259.697 59.3001V31.5581H239.31V22.3511H256.723C257.972 22.3511 258.813 22.1201 259.255 21.6361C259.697 21.1631 259.918 20.3381 259.918 19.1721V7.78711H270.167V22.3731H295.287V31.5801H270.167L270.178 31.5691Z" fill="white"/><path d="M403.946 28.1167C408.645 32.8357 411 39.6447 411 48.5657V76.6377H400.42V48.5657C400.42 42.7907 398.916 38.3687 395.898 35.2997C392.879 32.2307 388.59 30.6907 383.006 30.6907C378.75 30.6907 374.792 31.7137 371.165 33.7597C367.528 35.8057 364.753 38.5117 362.851 41.8777C363.216 44.2207 363.404 46.4427 363.404 48.5657V76.6377H352.934V48.5657C352.934 42.8677 351.43 38.4677 348.412 35.3547C345.393 32.2527 341.104 30.6907 335.52 30.6907C331.264 30.6907 327.361 31.6917 323.845 33.7047C320.318 35.7177 317.676 38.4017 315.907 41.7677V76.6267H305.437V22.3637H315.243L315.575 29.3817C318.217 26.6757 321.324 24.6077 324.884 23.1887C328.444 21.7587 332.325 21.0547 336.504 21.0547C341.944 21.0547 346.609 21.9897 350.501 23.8487C354.393 25.7077 357.4 28.4357 359.534 32.0217C362.398 28.5127 365.869 25.8067 369.949 23.9037C374.029 22.0007 378.562 21.0547 383.559 21.0547C392.448 21.0547 399.248 23.4087 403.946 28.1277V28.1167Z" fill="white"/><path d="M0.12207 23.463L35.8112 47.663L99.2733 21.714C98.7426 15.312 97.1948 10.23 93.2588 6.314C87.8966 1.023 80.4779 0 70.6601 0H54.5071L15.2137 1.364C11.7752 2.31 8.80112 3.861 6.30244 6.347C1.94633 10.648 0.497978 16.346 0.12207 23.463Z" fill="#9DFF00"/><path d="M17.8006 53.2844L0.199219 76.7364C0.674632 83.4024 2.17826 88.6604 6.25797 92.6864C6.88817 93.3024 7.54048 93.8634 8.22596 94.3694L33.1133 99.0004C33.1133 99.0004 73.8329 98.9674 75.3145 98.9014L99.2731 77.1874C99.45 75.0424 99.5052 72.7544 99.5052 70.3014V61.0504L17.8006 53.2734V53.2844Z" fill="#9DFF00"/><path d="M35.8002 32.373C41.472 32.373 47.9177 17.435 54.5071 0H28.5363C23.5168 0 19.0723 0.297 15.2026 1.364C16.0318 2.783 16.8389 4.224 17.6239 5.654C24.921 19.008 30.3937 32.373 35.8002 32.373Z" fill="#0062FF"/><path d="M75.3145 98.9015C82.8768 98.5495 88.814 97.1085 93.2475 92.6865C97.2056 88.7155 98.7424 83.6225 99.2731 77.1875C88.5155 77.4625 80.9752 86.8565 75.3145 98.9015Z" fill="#0062FF"/><path d="M19.2046 82.082C14.5832 82.082 11.1447 87.439 8.21484 94.38C13.378 98.208 20.1665 99.011 28.8345 99.011H33.1022C29.0114 89.265 24.4452 82.093 19.2046 82.093V82.082Z" fill="#0062FF"/><path d="M35.7997 49.4997L99.505 29.1387V28.6877C99.505 26.2017 99.4387 23.8807 99.2618 21.7027C93.0151 14.7837 87.0006 8.72266 81.2182 8.72266C74.3966 8.72266 66.4583 17.3357 58.509 25.9487C50.5596 34.5617 42.6213 43.1747 35.7997 43.1747C30.3933 43.1747 24.9315 37.8507 17.6234 32.5157C12.7809 28.9737 7.10908 25.4317 0.121617 23.4627C0.0331683 25.0357 0 26.6857 0 28.4017V30.2277L35.7997 49.5107V49.4997Z" fill="#000B1C"/><path d="M19.2045 51.4805C19.2045 51.4805 0 70.3015 0 70.2245V70.3125C0 72.5895 0.0552806 74.7345 0.19901 76.7475C1.73581 75.2515 3.20627 73.4365 4.76519 71.6215C8.46898 67.3205 12.6482 63.0085 19.2045 63.0085C27.3749 63.0085 33.9091 69.9715 39.5698 76.9235C45.2306 83.8865 50.0179 90.8385 54.7167 90.8385C59.4156 90.8385 63.0199 83.3915 69.2223 75.9445C75.4027 68.5415 84.2144 61.1385 99.505 61.0505V58.3445L19.2045 51.4805Z" fill="#000B1C"/><path d="M35.8 49.929L99.5053 39.721V29.15C93.1812 23.892 87.0783 19.25 81.2185 19.25C74.3969 19.25 66.4586 25.685 58.5093 32.12C50.5599 38.555 42.6216 44.99 35.8 44.99C30.3936 44.99 24.9319 41.008 17.6238 37.026C12.748 34.364 7.04306 31.702 -0.0107422 30.228V40.26L35.789 49.929H35.8Z" fill="#0062FF"/><path d="M19.2045 59.8063C27.3749 59.8063 33.9091 65.0093 39.5698 70.2123C45.2306 75.4153 50.0179 80.6183 54.7167 80.6183C59.4156 80.6183 63.0199 75.0523 69.2223 69.4863C75.4027 63.9533 84.2144 58.4093 99.505 58.3543V54.3613H6.68895L0 60.3123V70.2233C1.60314 69.0793 3.13994 67.6603 4.76519 66.2523C8.46898 63.0293 12.6482 59.8173 19.2045 59.8173V59.8063Z" fill="#0062FF"/><path d="M19.2048 55.087C27.3753 55.087 33.9094 57.694 39.5701 60.301C45.2309 62.908 50.0182 65.515 54.717 65.515C59.4159 65.515 63.0202 62.721 69.2226 59.927C75.403 57.155 84.2147 54.372 99.5053 54.35V39.709C93.1812 37.069 87.0783 34.748 81.2185 34.748C74.3969 34.748 66.4586 37.971 58.5093 41.205C50.5599 44.428 42.6216 47.662 35.8 47.662C30.3936 47.662 24.9319 45.66 17.6238 43.669C12.748 42.338 7.04306 40.996 -0.0107422 40.259V60.312C1.59239 59.74 3.12919 59.025 4.75444 58.321C8.45824 56.704 12.6375 55.098 19.1937 55.098L19.2048 55.087Z" fill="white"/></svg></a>
+        <div class="splash-wave"><canvas id="splashWave"></canvas></div>
+      </div>
+
+      <div class="toast" id="toast"><i></i><span></span></div>
+    </div>
+    <div class="homebar"></div>
+  </div></div></div>
+
+  <div class="toolbar" aria-label="Prototype controls">
+    <a href="index.html" class="demos"><svg class="ico" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>Demos</a>
+    <span class="sep"></span>
+    <a href="ijro.html" data-step="1"><span class="n">01</span>Instagram</a>
+    <a href="ijro.html?at=profile" data-step="2"><span class="n">02</span>riitm.uz</a>
+    <a href="ijro.html?at=post" data-step="3"><span class="n">03</span>Teaser</a>
+    <a href="ijro-app.html?launch=1" data-step="4"><span class="n">04</span>riitm</a>
+    <a href="ijro-app.html?at=foryou" data-step="5"><span class="n">05</span>Playlist</a>
+    <a href="ijro-player.html" data-step="6"><span class="n">06</span>Play</a>
+    <span class="sep"></span>
+    <button id="restartBtn"><svg class="ico" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>Restart demo</button>
+    <button id="fsBtn"><svg class="ico" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>Fullscreen</button>
+  </div>
+</div>
+
+<script>
+/* ───────── Shared helpers (identical in every page) ───────── */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+// Flow state between pages. Storage can throw (private mode, blocked site data), so every access is guarded.
+const store={get(k,d){try{const v=sessionStorage.getItem('riitm:'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+             set(k,v){try{sessionStorage.setItem('riitm:'+k,JSON.stringify(v))}catch(e){}}};
+const params=new URLSearchParams(location.search);
+// Page-to-page transition: play the leave animation, then load the next file.
+function go(url){document.body.classList.add('leaving');setTimeout(()=>{location.href=url},400)}
+addEventListener('pageshow',e=>{if(e.persisted)document.body.classList.remove('leaving')});
+let toastT;function toast(msg){const t=$('#toast');$('span',t).textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2400)}
+// Desktop: scale the 410×864 device to fit the window. Phones (≤520px): full-bleed, no frame.
+function fit(){const w=$('#wrap'),d=$('#device');
+  if(matchMedia('(max-width:520px)').matches){w.style.width=w.style.height='';d.style.removeProperty('--scale');return}
+  const s=Math.min(1,(innerHeight-96)/864,(innerWidth-32)/410);d.style.setProperty('--scale',s);w.style.width=410*s+'px';w.style.height=864*s+'px'}
+addEventListener('resize',fit);fit();
+// Brand "every wave" stripes: stacked sine bands that slide seamlessly (each path is one period wider than the view).
+function makeWaves(svg,w,h,bg,layers){
+  svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('preserveAspectRatio','xMidYMid slice');
+  let out=bg?`<rect width="${w}" height="${h}" fill="${bg}"/>`:'';
+  for(const L of layers){const P=L.period||w,step=P/48;let d=`M0 ${h+10}`;
+    for(let x=0;x<=w+P+0.1;x+=step){const y=L.y+L.amp*Math.sin(2*Math.PI*x/P+(L.ph||0))+(L.amp2||0)*Math.sin(4*Math.PI*x/P+(L.ph||0)*1.7);d+=`L${x.toFixed(1)} ${y.toFixed(1)}`}
+    out+=`<path d="${d}L${(w+P).toFixed(1)} ${h+10}Z" fill="${L.c}" style="--p:${-P}px;animation:waveSlide ${L.dur||10}s linear infinite${L.rev?' reverse':''}"/>`}
+  svg.innerHTML=out}
+// Brand wave (from the user's references): a mirrored sound wave, a white core inside blue, ink, lime and blue bands,
+// whose peaks travel along it. Draws the desktop backdrop here and the home banner.
+// o.amp: peak half-height as a share of the canvas height · o.base: band thickness scale · o.core: white core half-width (px)
+// o.level(): 0…1 swell target (e.g. playing vs paused) · o.glow: paint the blue/lime glow inside the canvas
+function brandWave(cv,o){
+  o=Object.assign({amp:.4,base:1,core:1.4,speed:1,level:()=>1,glow:false,maxDpr:3},o);
+  const ctx=cv.getContext('2d'),still=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  let W=0,H=0,dpr=1,t=0,last=0,level=o.level();
+  const LAYERS=[['#0062FF',1,3.4],['#9DFF00',.74,2.6],['#000B1C',.52,1.9],['#0062FF',.36,1.5]];  // colour, share of peak height, base half-width
+  // 0…1 amplitude along the wave: travelling bumps of different widths, so peaks rise and fall as they move
+  const env=(u,ph)=>Math.min(1,(.07+.5*Math.pow(Math.sin(u*Math.PI*3.2+t*.9+ph)*.5+.5,4)
+    +.75*Math.pow(Math.sin(u*Math.PI*1.6-t*.55+ph*1.9)*.5+.5,8)+.18*Math.pow(Math.sin(u*Math.PI*9.5+t*2.2+ph)*.5+.5,2))/1.15);
+  function size(){const r=cv.getBoundingClientRect(),k=r.width/cv.offsetWidth||1;dpr=Math.min(o.maxDpr,Math.max(1,k)*(devicePixelRatio||1));
+    W=cv.offsetWidth;H=cv.offsetHeight;cv.width=Math.max(1,Math.round(W*dpr));cv.height=Math.max(1,Math.round(H*dpr));draw()}
+  function draw(){if(!W||!H)return;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
+    const c=H/2,A=H*o.amp*level,step=Math.max(3,W/480),n=Math.ceil(W/step),top=[],bot=[];
+    for(let i=0;i<=n;i++){const u=i*step/W,e=env(u,0);top.push(e);bot.push(.55*e+.45*env(u,2.3))}
+    LAYERS.forEach(([col,share,base],li)=>{
+      ctx.shadowBlur=o.glow&&li<2?H*(li?.05:.08):0;ctx.shadowColor=li?'rgba(157,255,0,.35)':'rgba(0,98,255,.8)';
+      ctx.beginPath();base*=o.base;
+      for(let i=0;i<=n;i++)ctx.lineTo(i*step,c-base-A*share*top[i]);
+      for(let i=n;i>=0;i--)ctx.lineTo(i*step,c+base+A*share*bot[i]);
+      ctx.closePath();ctx.fillStyle=col;ctx.fill()});
+    ctx.shadowBlur=0;ctx.beginPath();
+    for(let i=0;i<=n;i++)ctx.lineTo(i*step,c-o.core*(1+.36*Math.sin(i*step/W*Math.PI*6+t*1.6)));
+    for(let i=n;i>=0;i--)ctx.lineTo(i*step,c+o.core*(1+.36*Math.sin(i*step/W*Math.PI*6+t*1.6+1)));
+    ctx.closePath();ctx.fillStyle='#FFFFFF';ctx.fill()}
+  function frame(now){const dt=last?Math.max(0,Math.min(.1,(now-last)/1000)):0;last=now;
+    if(cv.offsetWidth){level+=(o.level()-level)*Math.min(1,dt*3);t+=dt*o.speed*(.25+.75*level);draw()}   // hidden (phones): idle
+    requestAnimationFrame(frame)}
+  if(window.ResizeObserver)new ResizeObserver(size).observe(cv);size();
+  if(!still)requestAnimationFrame(frame)}
+brandWave($('#bgWave'),{amp:.3,base:6,core:7,speed:.5,glow:true,maxDpr:1.5});
+$('#fsBtn').onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}};
+// Restart replays the current feature's flow from its home screen (index.html is the demo selector)
+const rsb=$('#restartBtn');if(rsb)rsb.onclick=()=>{const f=store.get('flow','create');try{sessionStorage.clear()}catch(e){}go('home.html?flow='+f)};
+(function clock(){const c=$('#clock');if(!c)return;const tick=()=>{const d=new Date();c.textContent=(d.getHours()%12||12)+':'+String(d.getMinutes()).padStart(2,'0')};tick();setInterval(tick,15000)})();
+
+/* ───────── This page ───────── */
+/* ───────── Yangi Ijro shared: demo controller, toolbar steps, track model ───────── */
+store.set('flow','ijro');
+// Restart replays this feature from the phone's home screen
+if(rsb)rsb.onclick=()=>{try{sessionStorage.clear()}catch(e){}go('ijro.html')};
+// Jumping to a step from the toolbar plays the tour from there
+$$('.toolbar a[data-step]').forEach(a=>a.addEventListener('click',()=>store.set('demo',true)));
+function markStep(n){$$('.toolbar a[data-step]').forEach(a=>a.classList.toggle('on',+a.dataset.step===n))}
+
+// The automatic tour. Any real touch/key hands control to the user (and keeps the tour off on the next pages).
+const Demo={on:false,t:[],
+  active(){return store.get('demo',true)&&params.get('demo')!=='0'},
+  wait(ms){return new Promise((res,rej)=>{const id=setTimeout(()=>Demo.on?res():rej('stop'),ms);Demo.t.push(id)})},
+  stop(){if(!this.on)return;this.on=false;this.t.forEach(clearTimeout);this.t=[];this.onStop&&this.onStop()},
+  async run(fn){this.on=true;try{await fn()}catch(e){}}};
+['pointerdown','keydown','wheel'].forEach(ev=>$('#app').addEventListener(ev,e=>{if(!e.isTrusted)return;store.set('demo',false);if(Demo.on)Demo.stop()},{capture:true,passive:true}));
+const W=ms=>Demo.wait(ms);
+
+function tapFx(el){if(!el)return;el.classList.add('tap');setTimeout(()=>el.classList.remove('tap'),180)}
+function ripple(btn,x,y){const r=btn.getBoundingClientRect(),k=r.width/btn.offsetWidth||1,s=Math.max(r.width,r.height)*2.2/k,el=document.createElement('span');
+  if(x==null){x=r.left+r.width/2;y=r.top+r.height/2}
+  el.className='ripple';el.style.width=el.style.height=s+'px';el.style.left=((x-r.left)/k-s/2)+'px';el.style.top=((y-r.top)/k-s/2)+'px';btn.appendChild(el);setTimeout(()=>el.remove(),750)}
+// Demo tap: press animation (+ ripple on buttons that clip), then the element's own click handler
+async function demoTap(el,ms=260){tapFx(el);if(getComputedStyle(el).overflow==='hidden')ripple(el);await W(ms);el.click()}
+const fmt=s=>{s=Math.max(0,Math.floor(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+/* The track: the user's real recording, carried across pages (position + playing state live in store) */
+const TRACK={t:'Kerak emas (cover)',a:'Shukur Fazo & Shaxriyor',pl:'riitmda Yangi Ijro',src:'media/yangi-ijro.m4a',cover:'media/yangi-ijro-cover.jpg',dur:225.8};
+const NP=Object.assign({pos:0,playing:false},store.get('ijroNP',{}));
+const saveNP=()=>store.set('ijroNP',NP);
+const Likes={on(){return store.get('ijroLiked',false)},toggle(){const v=!this.on();store.set('ijroLiked',v);return v}};
+
+// <audio> + (on http) an analyser for artwork that reacts to the music.
+// Autoplay without a gesture can be refused: then the UI keeps running on a virtual clock and the first tap anywhere starts the sound there.
+const Track={el:null,ctx:null,an:null,fd:null,playing:false,blocked:false,vpos:0,vlast:0,subs:[],
+  init(){const a=this.el=document.createElement('audio');a.src=TRACK.src;a.preload='auto';document.body.appendChild(a);
+    a.addEventListener('loadedmetadata',()=>{if(NP.pos>0&&NP.pos<a.duration-1&&!this.blocked)a.currentTime=NP.pos});
+    a.addEventListener('ended',()=>this.end());
+    setInterval(()=>{if(this.playing){NP.pos=this.time();saveNP()}},500);
+    addEventListener('pagehide',()=>{NP.pos=this.time();saveNP();a.pause()});
+    $('#app').addEventListener('pointerdown',e=>{if(!e.isTrusted)return;this.unlock()},{capture:true});
+    this.vpos=NP.pos;return this},
+  on(fn){this.subs.push(fn)},emit(){this.subs.forEach(f=>f(this))},
+  dur(){const d=this.el&&this.el.duration;return isFinite(d)&&d>0?d:TRACK.dur},
+  time(){if(this.blocked){if(this.playing){const n=performance.now();this.vpos+=(n-this.vlast)/1000;this.vlast=n;if(this.vpos>=this.dur())this.end()}return this.vpos}
+    return this.el.readyState?this.el.currentTime:NP.pos},
+  async ctxUp(){const AC=window.AudioContext||window.webkitAudioContext;if(!AC||!/^https?:/.test(location.protocol))return;   // file:// would mute a routed element
+    try{this.ctx=this.ctx||new AC()}catch(e){return}
+    if(this.ctx.state!=='running')await Promise.race([this.ctx.resume(),new Promise(r=>setTimeout(r,350))]);
+    if(this.ctx.state==='running'&&!this.an){   // route the element only once the context can actually make sound
+      const s=this.ctx.createMediaElementSource(this.el);this.an=this.ctx.createAnalyser();this.an.fftSize=256;this.an.smoothingTimeConstant=.82;
+      s.connect(this.an);this.an.connect(this.ctx.destination);this.fd=new Uint8Array(this.an.frequencyBinCount)}},
+  async play(){const at=this.time();this.playing=true;NP.playing=true;saveNP();this.emit();
+    await this.ctxUp();if(!this.playing)return;
+    if(Math.abs(this.el.currentTime-at)>.5&&this.el.readyState)this.el.currentTime=at;
+    try{await this.el.play();this.blocked=false}
+    catch(e){if(!this.playing||e.name==='AbortError')return;this.blocked=true;this.vpos=at;this.vlast=performance.now()}
+    this.emit()},
+  pause(){NP.pos=this.time();this.playing=false;this.el.pause();NP.playing=false;saveNP();this.emit()},
+  toggle(){this.playing?this.pause():this.play()},
+  seek(t){t=Math.max(0,Math.min(this.dur()-.2,t));this.vpos=t;this.vlast=performance.now();if(this.el.readyState)this.el.currentTime=t;NP.pos=t;saveNP();this.emit()},
+  end(){this.playing=false;this.el.pause();this.vpos=0;if(this.el.readyState)this.el.currentTime=0;NP.pos=0;NP.playing=false;saveNP();this.emit();this.onEnd&&this.onEnd()},
+  unlock(){this.ctxUp().then(()=>{if(this.blocked&&this.playing){const at=this.time();if(this.el.readyState)this.el.currentTime=at;
+    this.el.play().then(()=>{this.blocked=false;this.emit()}).catch(()=>{})}})},
+  // 0…1 loudness of the low end (fake but steady when there's no analyser)
+  level(){if(!this.playing)return 0;if(this.an&&!this.blocked){this.an.getByteFrequencyData(this.fd);let s=0;for(let i=1;i<9;i++)s+=this.fd[i];return Math.min(1,s/8/255*1.15)}
+    const t=performance.now()/1000;return .45+.25*Math.max(0,Math.sin(t*Math.PI*2*1.6))}};
+
+const IC={
+  play:'<svg viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.2-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z" fill="currentColor"/></svg>',
+  pause:'<svg viewBox="0 0 24 24"><rect x="6.5" y="5" width="4" height="14" rx="1.2" fill="currentColor"/><rect x="13.5" y="5" width="4" height="14" rx="1.2" fill="currentColor"/></svg>',
+  heart:'<svg viewBox="0 0 24 24"><path d="M12 20.3s-7.6-4.6-9.3-9.4C1.6 7.6 3.9 4.6 7.3 4.6c2 0 3.7 1.1 4.7 2.8 1-1.7 2.7-2.8 4.7-2.8 3.4 0 5.7 3 4.6 6.3-1.7 4.8-9.3 9.4-9.3 9.4z"/></svg>'};
+
+/* ───── riitm home ───── */
+Track.init();
+const sc=$('#scroll'),logoSvg=()=>`<svg viewBox="0 0 411 99" fill="none">${$('.logo svg').innerHTML}</svg>`;
+
+/* Covers: generated art (brand + secondary palette) for everything that isn't the Yangi Ijro photo */
+function miniCover(seed,c){const R=rng(seed);let d='';
+  for(let i=0;i<3;i++){let p=`M0 100 L0 ${55+i*14}`;const ph=R()*6;for(let x=0;x<=100;x+=5)p+=` L${x} ${(55+i*14+Math.sin(x/16+ph)*7).toFixed(1)}`;d+=`<path d="${p} L100 100Z" fill="${c[i+1]}" opacity="${(.9-i*.15).toFixed(2)}"/>`}
+  return `<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice"><rect width="100" height="100" fill="${c[0]}"/><circle cx="${30+R()*40}" cy="${28+R()*10}" r="${12+R()*8}" fill="${c[4]||'#B6FF38'}" opacity=".9"/>${d}</svg>`}
+function bigArt(seed,c,kind){const R=rng(seed);let s='';
+  if(kind==='rings')for(let i=0;i<7;i++)s+=`<circle cx="${110+R()*10}" cy="${40+R()*10}" r="${18+i*16}" fill="none" stroke="#fff" stroke-opacity="${(.32-i*.04).toFixed(2)}" stroke-width="${(1+R()*2).toFixed(1)}"/>`;
+  else for(let i=0;i<6;i++){let d=`M-10 ${30+i*10}`;for(let x=0;x<=170;x+=10)d+=` L${x} ${(30+i*10+Math.sin(x/22+i*.9)*(8+i*1.5)).toFixed(1)}`;s+=`<path d="${d}" fill="none" stroke="${i%2?c[2]:'#fff'}" stroke-opacity="${(.55-i*.06).toFixed(2)}" stroke-width="${(5-i*.5).toFixed(1)}" stroke-linecap="round"/>`}
+  return `<svg class="bg" viewBox="0 0 150 150" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="g${seed}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c[0]}"/><stop offset="1" stop-color="${c[1]}"/></linearGradient></defs><rect width="150" height="150" fill="url(#g${seed})"/>${s}</svg>`}
+
+const TRACKS=[['Business','Shaxlo',['#1a1d26','#FF3D75','#8A03FF','#000B1C','#DBF717']],['Горячая линия','Cream Soda, Лауд',['#04122e','#0062FF','#00FCDF','#000B1C','#FF00CC']],['San','Shaxlo',['#2a0c05','#FF7300','#FF3D3D','#1a0a05','#FFD54A']]];
+const KEB='<span class="kebab"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5.5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="18.5" r="1.6"/></svg></span>';
+$('#trackList').innerHTML=TRACKS.map(([t,a,c],i)=>`<button class="trk" data-toast="“${t}” isn't in this preview — try Kerak emas"><span class="th">${miniCover(11+i,c)}</span><span><b>${t}</b><small>${a}</small></span>${KEB}</button>`).join('');
+
+const PLS=[
+  {t:'Top 100<br>Uzbekistan',name:'Top 100<br>Uzbekistan',art:bigArt(3,['#FF3D75','#8A03FF','#FF00CC'],'rings'),lbl:'left'},
+  {yi:1,name:'riitmda<br><b>Yangi Ijro</b>'},
+  {t:'In Trend',name:'In Trend',art:bigArt(5,['#FF7300','#8a1414','#FFD54A']),lbl:'trend'},
+  {t:'AI Mixes',name:'AI Mixes',art:bigArt(9,['#0062FF','#000B1C','#00FCDF'],'rings'),lbl:'left'}];
+$('#pls').innerHTML=PLS.map(p=>p.yi
+  ?`<button class="pl feat" id="yiPl"><span class="pc yi"><img src="${TRACK.cover}" alt=""><span class="pt"><small>riitmda</small><b>Yangi Ijro</b><span class="lg">${logoSvg()}</span></span></span><span>${p.name}</span></button>`
+  :`<button class="pl" data-toast="${p.name.replace('<br>',' ')} · playlist"><span class="pc">${p.art}<span class="pt ${p.lbl==='left'?'left':''}"><b style="${p.lbl==='trend'?'color:var(--lime)':''}">${p.t}</b></span></span><span>${p.name}</span></button>`).join('');
+const RECS=[['Vibe check',['#2b0f3a','#FF3D75','#8A03FF','#000B1C','#FFD54A']],['Uzbek Pop Hits',['#3a2a05','#FFD54A','#FF7300','#2a0c05','#fff']],['Chill & Focus',['#04122e','#0062FF','#00FCDF','#000B1C','#B6FF38']],['Late Night Drive',['#0b0c10','#8A03FF','#0062FF','#000B1C','#FF00CC']],['Workout Energy',['#0d1f0a','#3DFF5D','#9DFF00','#000B1C','#fff']]];
+$('#recs').innerHTML=RECS.map(([t,c],i)=>`<button class="rec" data-toast="${t.replace('&','&amp;')} · playlist"><span class="th">${miniCover(31+i,c)}</span><span><b>${t.replace('&','&amp;')}</b><small>Playlist • riitm</small></span>${KEB}</button>`).join('');
+
+/* Controls */
+$('#app').addEventListener('click',e=>{const t=e.target.closest('[data-toast]');if(t)toast(t.dataset.toast)});
+$$('.chip').forEach(c=>c.onclick=()=>{$$('.chip').forEach(x=>x.classList.toggle('on',x===c));if(c.textContent!=='All')toast(`Showing ${c.textContent.toLowerCase()} for you`)});
+$$('.tab').forEach(t=>t.onclick=()=>{if(t.dataset.tab==='Home'){sc.scrollTo({top:0,behavior:'smooth'});return}toast(`${t.dataset.tab} isn't part of this demo`)});
+$('#bellBtn').onclick=()=>toast('New: Yangi Ijro — Kerak emas (cover)');
+$('#setBtn').onclick=()=>toast('Settings');
+$('#dlBtn').onclick=e=>{const b=e.currentTarget;if(b.classList.contains('done'))return toast('Already downloaded');toast('Downloading “Kerak emas (cover)”…');setTimeout(()=>{b.classList.add('done');toast('Saved for offline listening')},1600)};
+$('#shareBtn').onclick=()=>{try{navigator.clipboard.writeText(location.href.split('?')[0]).catch(()=>{})}catch(e){}toast('Link copied')};
+function renderLikes(){const on=Likes.on();[$('#heroLike'),$('#miniLike')].forEach(b=>{b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)})}
+$('#heroLike').innerHTML=$('#miniLike').innerHTML=IC.heart;
+[$('#heroLike'),$('#miniLike')].forEach(b=>b.onclick=()=>{const on=Likes.toggle();renderLikes();toast(on?'Added to Liked songs':'Removed from Liked songs')});
+renderLikes();
+
+// Opening the player: from the playlist (you press Play there) or from a Play button (starts right away)
+function openPlayer(play){NP.pos=Track.time();NP.playing=Track.playing;saveNP();go('ijro-player.html'+(play?'?play=1':''))}
+$('#yiPl').onclick=()=>{tapFx($('#yiPl'));openPlayer(false)};
+$('#heroPlay').onclick=e=>{ripple($('#heroPlay'),e.clientX||null,e.clientY||null);if(Track.playing)return openPlayer(false);setTimeout(()=>openPlayer(true),200)};
+$('#miniTxt').onclick=()=>openPlayer(false);
+$('#miniPP').onclick=()=>Track.toggle();
+
+function renderPlay(){const p=Track.playing;$('#miniPP').innerHTML=p?IC.pause:IC.play;$('#miniPP').setAttribute('aria-label',p?'Pause':'Play');
+  $('.pp-i').innerHTML=p?IC.pause:IC.play;$('.pp-t').textContent=p?'Playing':'Play'}
+Track.on(renderPlay);renderPlay();
+(function frame(){$('#miniProg').style.width=(Track.time()/Track.dur()*100).toFixed(2)+'%';requestAnimationFrame(frame)})();
+// Coming back from the player while it played: keep the music going
+if(NP.playing)Track.play();
+
+/* Status-bar shade once the hero has scrolled away */
+sc.addEventListener('scroll',()=>$('#sbShade').classList.toggle('on',sc.scrollTop>$('#hero').offsetHeight-90),{passive:true});
+
+/* Smooth scroll with our own easing so the tour has a known duration */
+function glide(el,to,ms){return new Promise(res=>{const from=el.scrollTop,t0=performance.now(),e=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+  const fallback=setTimeout(()=>{el.scrollTop=to;res()},ms+400);
+  (function step(now){const k=Math.min(1,(now-t0)/ms);el.scrollTop=from+(to-from)*e(k);if(k<1)requestAnimationFrame(step);else{clearTimeout(fallback);res()}})(t0)})}
+const forYouTop=()=>$('#foryou').offsetTop-(matchMedia('(max-width:520px)').matches?0:34);
+
+/* Launch splash (arriving from Instagram) */
+async function splash(){const s=$('#splash');s.hidden=false;
+  brandWave($('#splashWave'),{amp:.36,base:1.2,core:2,speed:1.2});
+  await new Promise(r=>setTimeout(r,1500));s.classList.add('out');setTimeout(()=>s.hidden=true,600)}
+
+async function tour(){
+  markStep(4);
+  await W(params.get('launch')?2300:1400);
+  markStep(5);
+  await glide(sc,forYouTop(),1300);
+  await W(700);
+  const pl=$('#yiPl'),row=$('#pls');row.scrollTo({left:Math.max(0,pl.offsetLeft-row.offsetWidth/2+pl.offsetWidth/2),behavior:'smooth'});
+  await W(500);pl.classList.add('found');
+  await W(1700);
+  tapFx(pl);await W(260);pl.classList.remove('found');openPlayer(false)}
+
+const AT=params.get('at');
+if(AT==='foryou'){sc.scrollTop=forYouTop();markStep(5)}else markStep(4);
+if(params.get('launch')&&!matchMedia('(prefers-reduced-motion:reduce)').matches)splash();
+if(Demo.active()&&!NP.playing){store.set('demo',true);Demo.run(tour)}
+
+</script>
+</body>
+</html>

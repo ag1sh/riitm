@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0C10">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Riitm">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<title>riitm — Kerak emas (cover)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ───────── Shared tokens & device frame (identical in every page) ───────── */
+:root{
+  --bg:#0B0C10; --card:#14161D; --card-2:#1A1D26; --field:#0F1116;
+  --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.14);
+  --text:#F4F6F8; --muted:#8C93A1; --dim:#5D6370;
+  --lime:#B6FF38; --lime-brand:#9DFF00; --blue:#0062FF; --ink:#000B1C;
+  --fb:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --fd:'Archivo','Inter',system-ui,sans-serif;   /* stand-in for Halvar Breitschrift: use with font-stretch:108–125% */
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{background:#0B0C10}
+body{height:100vh;height:100dvh;overflow:hidden;font-family:var(--fb);color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{color:inherit}
+svg{display:block}
+.stage{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+.stage-bg{position:fixed;inset:0;z-index:0;overflow:hidden}
+.stage-bg canvas{display:block;width:100%;height:100%}
+.stage-bg::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 34% 55% at 50% 48%,rgba(11,12,16,.6),rgba(11,12,16,0) 75%)}
+.device-wrap{position:relative;z-index:1;width:410px;height:864px;flex:none}
+.device{position:absolute;left:0;top:0;width:410px;height:864px;padding:10px;border-radius:60px;
+  background:linear-gradient(150deg,#3b3e47,#121318 28%,#0a0b0e 70%,#2b2e36);
+  box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.08),0 50px 120px -30px rgba(0,0,0,.9),0 0 0 1px #000;
+  transform:scale(var(--scale,1));transform-origin:0 0}
+.screen{position:relative;width:100%;height:100%;border-radius:50px;overflow:hidden;background:var(--bg);isolation:isolate}
+.app{position:absolute;inset:0;display:flex;flex-direction:column}
+.statusbar{flex:none;height:50px;padding:17px 30px 0 38px;display:flex;justify-content:space-between;font:600 15px var(--fb);letter-spacing:-.01em;position:relative;z-index:5}
+.statusbar .sys{display:flex;gap:6px;align-items:center}
+.homebar{position:absolute;bottom:8px;left:50%;width:134px;height:5px;border-radius:3px;background:rgba(255,255,255,.85);transform:translateX(-50%);z-index:60;pointer-events:none}
+.hdr{flex:none;height:56px;padding:0 22px;display:flex;align-items:center;justify-content:space-between;position:relative;z-index:5}
+.logo{display:block;height:26px}
+.logo svg{height:26px;width:auto}
+.icon-btn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line-2);background:rgba(255,255,255,.03);transition:background .2s,transform .2s var(--ease)}
+.icon-btn:hover{background:rgba(255,255,255,.07)}
+.icon-btn:active{transform:scale(.92)}
+.icon-btn svg{width:19px;height:19px}
+.ico{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.toolbar{position:relative;z-index:2;display:flex;align-items:center;gap:4px;max-width:calc(100vw - 24px);overflow-x:auto;scrollbar-width:none;padding:5px;border-radius:999px;background:rgba(11,12,16,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line)}
+.toolbar a,.toolbar button{height:34px;padding:0 14px;border-radius:999px;display:inline-flex;align-items:center;gap:7px;font:500 12.5px var(--fb);color:var(--muted);text-decoration:none;transition:color .2s,background .2s;white-space:nowrap}
+.toolbar a:hover,.toolbar button:hover{color:var(--text);background:rgba(255,255,255,.06)}
+.toolbar a.on{background:var(--lime);color:#0B0C10}
+.toolbar .n{font-variant-numeric:tabular-nums;opacity:.55}
+.toolbar .sep{width:1px;height:18px;background:var(--line-2);margin:0 4px}
+.toolbar svg{width:15px;height:15px}
+.toast{position:absolute;left:50%;bottom:112px;z-index:70;transform:translate(-50%,16px);opacity:0;pointer-events:none;display:flex;align-items:center;gap:10px;max-width:86%;
+  padding:11px 16px;border-radius:16px;background:rgba(26,29,38,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line-2);font:500 13px var(--fb);
+  box-shadow:0 18px 40px -12px rgba(0,0,0,.7);transition:opacity .3s,transform .4s var(--ease)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast i{width:8px;height:8px;border-radius:50%;background:var(--lime);box-shadow:0 0 10px var(--lime);flex:none}
+.reveal{animation:rise .8s var(--ease) both;animation-delay:calc(var(--d,0) * 75ms + 60ms)}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}}
+body.leaving .app{animation:leave .42s var(--ease) forwards}
+@keyframes leave{to{opacity:0;transform:scale(.965);filter:blur(6px)}}
+@keyframes waveSlide{to{transform:translateX(var(--p))}}
+.scroll{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+@media (max-width:520px){
+  .stage{display:block}
+  .stage-bg,.toolbar,.statusbar,.homebar{display:none}
+  .device-wrap{width:100%!important;height:100%!important}
+  .device{width:100%;height:100%;padding:0;border-radius:0;background:none;box-shadow:none;transform:none}
+  .screen{border-radius:0}
+  .app{padding-top:max(env(safe-area-inset-top),8px);padding-bottom:env(safe-area-inset-bottom)}
+}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* ───────── This page ───────── */
+/* ───────── Yangi Ijro shared ───────── */
+*{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:3px}
+::-webkit-scrollbar-button{display:none;width:0;height:0}
+.toolbar .demos{color:var(--text)}
+:root{--sbh:50px}
+@media (max-width:520px){:root{--sbh:0px}}
+.tap{transform:scale(.93)!important;transition:transform .12s!important}
+.ripple{position:absolute;border-radius:50%;background:rgba(11,12,16,.22);transform:scale(0);animation:ripple .7s var(--ease) forwards;pointer-events:none}
+@keyframes ripple{to{transform:scale(1);opacity:0}}
+.ghost{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;transition:background .2s,transform .2s var(--ease)}
+.ghost:hover{background:rgba(255,255,255,.07)}
+.ghost:active{transform:scale(.9)}
+.ghost svg{width:23px;height:23px}
+.hide-x{scrollbar-width:none}.hide-x::-webkit-scrollbar{display:none}
+/* Heart: outline → filled red */
+.lk svg{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round;transition:transform .3s var(--ease)}
+.lk.on{color:#FF3D57}.lk.on svg{fill:currentColor;animation:pop .4s var(--ease)}
+@keyframes pop{40%{transform:scale(1.3)}}
+.toast{bottom:150px}
+
+/* ───── Player: Kerak emas (cover) ───── */
+.amb{position:absolute;inset:0;z-index:0;overflow:hidden;background:#1c140e}
+.amb img{position:absolute;inset:-20%;width:140%;height:140%;object-fit:cover;filter:blur(46px) saturate(1.25) brightness(.62);transform:scale(1.1)}
+.amb::after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(20,14,10,.25),rgba(20,14,10,.35) 45%,rgba(11,12,16,.92))}
+.amb i{position:absolute;left:50%;top:32%;width:420px;height:420px;margin:-210px 0 0 -210px;border-radius:50%;z-index:1;
+  background:radial-gradient(circle,rgba(255,170,90,.32),rgba(255,170,90,0) 65%);opacity:0;transition:opacity .6s}
+.pl-hdr,.pl-main{position:relative;z-index:2}
+.pl-hdr{padding:0 12px}
+.pl-hdr .ghost svg{width:26px;height:26px}
+.pl-main{padding:0 20px 24px;display:flex;flex-direction:column}
+.art{position:relative;flex:none;width:100%;aspect-ratio:1;border-radius:20px;overflow:hidden;box-shadow:0 30px 60px -24px rgba(0,0,0,.8);
+  transition:transform .6s var(--ease)}
+.art img{width:100%;height:100%;object-fit:cover;object-position:50% 25%;display:block}
+.art::after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,0) 55%,rgba(0,0,0,.7));border-radius:inherit}
+.art-txt{position:absolute;left:0;right:0;bottom:22px;z-index:2;text-align:center;text-shadow:0 2px 14px rgba(0,0,0,.6)}
+.art{container-type:inline-size}
+.art-txt b{display:block;font:800 min(21px,5.9cqw)/1.05 var(--fd);font-stretch:110%;text-transform:uppercase;white-space:nowrap}
+.art-txt span{display:block;margin-top:5px;font:400 19px var(--fb)}
+body.paused .art{transform:scale(.93)}
+.meta{display:flex;align-items:center;gap:2px;margin-top:20px}
+.meta>div{flex:1;min-width:0}
+.meta h1{font:600 19px var(--fb);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta p{margin-top:3px;font:400 14.5px var(--fb);color:rgba(255,255,255,.72)}
+.meta .ghost svg{width:22px;height:22px}
+.seek{position:relative;height:30px;margin-top:12px;cursor:pointer;touch-action:none;outline:0}
+.rail{position:absolute;left:0;right:0;top:50%;height:4px;margin-top:-2px;border-radius:2px;background:rgba(255,255,255,.22)}
+.rail i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:2px;background:var(--lime)}
+.rail b{position:absolute;top:50%;left:0;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 4px rgba(182,255,56,.18),0 0 12px rgba(182,255,56,.7);transition:transform .2s var(--ease)}
+.seek:active .rail b,.seek:focus-visible .rail b{transform:scale(1.3)}
+.times{display:flex;justify-content:space-between;font:500 12px var(--fb);color:rgba(255,255,255,.62);font-variant-numeric:tabular-nums}
+.ctrls{display:flex;align-items:center;justify-content:center;gap:34px;margin-top:12px}
+.c2{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.12);transition:transform .2s var(--ease),background .2s}
+.c2:hover{background:rgba(255,255,255,.18)}
+.c2:active{transform:scale(.9)}
+.c2 svg{width:22px;height:22px}
+.cp{position:relative;width:74px;height:74px;border-radius:50%;display:grid;place-items:center;background:#fff;color:#0B0C10;box-shadow:0 14px 34px -12px rgba(0,0,0,.7);transition:transform .25s var(--ease),box-shadow .3s}
+.cp:active{transform:scale(.92)}
+.cp svg{width:32px;height:32px}
+.cp::before{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid var(--lime);opacity:0;transform:scale(.9);transition:opacity .3s,transform .4s var(--ease)}
+body:not(.paused) .cp::before{opacity:.55;transform:scale(calc(1 + var(--lv,0) * .12))}
+.acts{display:flex;justify-content:space-between;margin-top:14px;padding:0 4px}
+.acts .ghost{width:44px;height:44px;color:rgba(255,255,255,.85)}
+.acts .ghost svg{width:24px;height:24px}
+.acts .ghost.on{color:var(--lime)}
+.acts .lk.on{color:#FF3D57}
+.acts .ghost.done{color:var(--lime)}
+.album{display:flex;align-items:center;gap:12px;width:100%;height:58px;margin-top:14px;padding:0 14px 0 8px;border-radius:14px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);text-align:left;transition:background .2s}
+.album:hover{background:rgba(255,255,255,.14)}
+.album img{width:42px;height:42px;border-radius:8px;object-fit:cover;object-position:50% 20%}
+.album span{flex:1}
+.album small{display:block;font:400 12px var(--fb);color:rgba(255,255,255,.62)}
+.album b{display:block;margin-top:2px;font:500 14.5px var(--fb)}
+.album svg{width:18px;height:18px;color:rgba(255,255,255,.5)}
+.hear{position:absolute;left:50%;top:calc(var(--sbh) + 64px);z-index:20;display:flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:999px;transform:translateX(-50%);
+  background:var(--lime);color:#0B0C10;font:600 13.5px var(--fb);box-shadow:0 12px 30px -10px rgba(182,255,56,.8);animation:rise .5s var(--ease) both}
+.hear svg{width:18px;height:18px}
+@media (max-width:520px){.art{width:min(100%,calc(100dvh - 430px));align-self:center}}
+.hear[hidden]{display:none}
+
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="stage-bg" aria-hidden="true"><canvas id="bgWave"></canvas></div>
+
+  <div class="device-wrap" id="wrap"><div class="device" id="device"><div class="screen">
+    <div class="app" id="app">
+      <div class="statusbar"><span id="clock">9:41</span><span class="sys">
+        <svg width="18" height="11" viewBox="0 0 18 11" fill="#fff"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="6" rx="1"/><rect x="10" y="2.5" width="3" height="8.5" rx="1"/><rect x="15" y="0" width="3" height="11" rx="1"/></svg>
+        <svg width="16" height="11" viewBox="0 0 16 11" fill="#fff"><path d="M8 2.2c2.3 0 4.4.9 6 2.4l1.2-1.3A10.4 10.4 0 0 0 8 .4 10.4 10.4 0 0 0 .8 3.3L2 4.6a8.6 8.6 0 0 1 6-2.4zm0 3.4c1.4 0 2.6.5 3.6 1.4l1.2-1.3A7 7 0 0 0 8 3.8a7 7 0 0 0-4.8 1.9L4.4 7c1-.9 2.2-1.4 3.6-1.4zM8 9a1.7 1.7 0 0 0-1.2.5L8 10.8l1.2-1.3A1.7 1.7 0 0 0 8 9z"/></svg>
+        <svg width="27" height="13" viewBox="0 0 27 13"><rect x=".5" y=".5" width="23" height="12" rx="3.5" fill="none" stroke="#fff" opacity=".4"/><rect x="2" y="2" width="20" height="9" rx="2" fill="#fff"/><rect x="25" y="4.5" width="1.6" height="4" rx=".8" fill="#fff" opacity=".45"/></svg>
+      </span></div>
+
+      <div class="amb" aria-hidden="true"><img src="media/yangi-ijro-cover.jpg" alt=""><i id="ambGlow"></i></div>
+      <header class="hdr pl-hdr reveal" style="--d:0">
+        <button class="ghost" id="downBtn" aria-label="Close player"><svg class="ico" viewBox="0 0 24 24"><path d="M5 9l7 7 7-7"/></svg></button>
+        <button class="ghost" id="queueBtn" aria-label="Queue"><svg class="ico" viewBox="0 0 24 24"><path d="M4 6h16M4 11h16M4 16h10M17 15v6l4-3z"/></svg></button>
+      </header>
+      <main class="scroll pl-main">
+        <div class="art reveal" style="--d:1" id="art">
+          <img src="media/yangi-ijro-cover.jpg" alt="Shukur Fazo and Shaxriyor">
+          <div class="art-txt"><b>Shukur Fazo &amp; Shaxriyor</b><span>Kerak emas (cover)</span></div>
+        </div>
+        <div class="meta reveal" style="--d:2">
+          <div><h1>Kerak emas (cover)</h1><p>Shukur Fazo &amp; Shaxriyor</p></div>
+          <button class="ghost" id="shareBtn" aria-label="Share"><svg class="ico" viewBox="0 0 24 24"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"/><path d="M8 11H6.5A1.5 1.5 0 0 0 5 12.5v6A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5v-6a1.5 1.5 0 0 0-1.5-1.5H16"/></svg></button>
+          <button class="ghost" id="moreBtn" aria-label="More"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg></button>
+        </div>
+        <div class="seek reveal" style="--d:3" id="seek" role="slider" tabindex="0" aria-label="Seek" aria-valuemin="0" aria-valuemax="226" aria-valuenow="0">
+          <div class="rail"><i id="fill"></i><b id="knob"></b></div>
+        </div>
+        <div class="times reveal" style="--d:3"><span id="tCur">0:00</span><span id="tLeft">-3:45</span></div>
+        <div class="ctrls reveal" style="--d:4">
+          <button class="c2" id="prevBtn" aria-label="Previous"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="2.6" height="14" rx="1"/><path d="M19 6.2v11.6a1 1 0 0 1-1.5.86L9.3 13.3a1.5 1.5 0 0 1 0-2.6l8.2-5.36A1 1 0 0 1 19 6.2z"/></svg></button>
+          <button class="cp" id="ppBtn" aria-label="Play"></button>
+          <button class="c2" id="nextBtn" aria-label="Next"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="16.4" y="5" width="2.6" height="14" rx="1"/><path d="M5 6.2v11.6a1 1 0 0 0 1.5.86l8.2-5.36a1.5 1.5 0 0 0 0-2.6L6.5 5.34A1 1 0 0 0 5 6.2z"/></svg></button>
+        </div>
+        <div class="acts reveal" style="--d:5">
+          <button class="ghost lk" id="likeBtn" aria-label="Like"></button>
+          <button class="ghost" id="repBtn" aria-label="Repeat"><svg class="ico" viewBox="0 0 24 24"><path d="M17 2.5 20.5 6 17 9.5"/><path d="M3.5 11.5V10a4 4 0 0 1 4-4h13"/><path d="M7 21.5 3.5 18 7 14.5"/><path d="M20.5 12.5V14a4 4 0 0 1-4 4h-13"/></svg></button>
+          <button class="ghost" id="dlBtn" aria-label="Download"><svg class="ico" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 20h14"/></svg></button>
+          <button class="ghost" id="addBtn" aria-label="Add to playlist"><svg class="ico" viewBox="0 0 24 24"><path d="M4 6h12M4 11h12M4 16h7M18 13v8M14 17h8"/></svg></button>
+        </div>
+        <button class="album reveal" style="--d:6" id="albumBtn">
+          <img src="media/yangi-ijro-cover.jpg" alt=""><span><small>Playlist</small><b>riitmda Yangi Ijro</b></span>
+          <svg class="ico" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+        </button>
+      </main>
+      <button class="hear" id="hear" hidden><svg class="ico" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9a4.5 4.5 0 0 1 0 6M18 6.5a8 8 0 0 1 0 11"/></svg>Tap to hear the track</button>
+
+      <div class="toast" id="toast"><i></i><span></span></div>
+    </div>
+    <div class="homebar"></div>
+  </div></div></div>
+
+  <div class="toolbar" aria-label="Prototype controls">
+    <a href="index.html" class="demos"><svg class="ico" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>Demos</a>
+    <span class="sep"></span>
+    <a href="ijro.html" data-step="1"><span class="n">01</span>Instagram</a>
+    <a href="ijro.html?at=profile" data-step="2"><span class="n">02</span>riitm.uz</a>
+    <a href="ijro.html?at=post" data-step="3"><span class="n">03</span>Teaser</a>
+    <a href="ijro-app.html?launch=1" data-step="4"><span class="n">04</span>riitm</a>
+    <a href="ijro-app.html?at=foryou" data-step="5"><span class="n">05</span>Playlist</a>
+    <a href="ijro-player.html" data-step="6"><span class="n">06</span>Play</a>
+    <span class="sep"></span>
+    <button id="restartBtn"><svg class="ico" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/></svg>Restart demo</button>
+    <button id="fsBtn"><svg class="ico" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>Fullscreen</button>
+  </div>
+</div>
+
+<script>
+/* ───────── Shared helpers (identical in every page) ───────── */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+// Flow state between pages. Storage can throw (private mode, blocked site data), so every access is guarded.
+const store={get(k,d){try{const v=sessionStorage.getItem('riitm:'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},
+             set(k,v){try{sessionStorage.setItem('riitm:'+k,JSON.stringify(v))}catch(e){}}};
+const params=new URLSearchParams(location.search);
+// Page-to-page transition: play the leave animation, then load the next file.
+function go(url){document.body.classList.add('leaving');setTimeout(()=>{location.href=url},400)}
+addEventListener('pageshow',e=>{if(e.persisted)document.body.classList.remove('leaving')});
+let toastT;function toast(msg){const t=$('#toast');$('span',t).textContent=msg;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2400)}
+// Desktop: scale the 410×864 device to fit the window. Phones (≤520px): full-bleed, no frame.
+function fit(){const w=$('#wrap'),d=$('#device');
+  if(matchMedia('(max-width:520px)').matches){w.style.width=w.style.height='';d.style.removeProperty('--scale');return}
+  const s=Math.min(1,(innerHeight-96)/864,(innerWidth-32)/410);d.style.setProperty('--scale',s);w.style.width=410*s+'px';w.style.height=864*s+'px'}
+addEventListener('resize',fit);fit();
+// Brand "every wave" stripes: stacked sine bands that slide seamlessly (each path is one period wider than the view).
+function makeWaves(svg,w,h,bg,layers){
+  svg.setAttribute('viewBox',`0 0 ${w} ${h}`);svg.setAttribute('preserveAspectRatio','xMidYMid slice');
+  let out=bg?`<rect width="${w}" height="${h}" fill="${bg}"/>`:'';
+  for(const L of layers){const P=L.period||w,step=P/48;let d=`M0 ${h+10}`;
+    for(let x=0;x<=w+P+0.1;x+=step){const y=L.y+L.amp*Math.sin(2*Math.PI*x/P+(L.ph||0))+(L.amp2||0)*Math.sin(4*Math.PI*x/P+(L.ph||0)*1.7);d+=`L${x.toFixed(1)} ${y.toFixed(1)}`}
+    out+=`<path d="${d}L${(w+P).toFixed(1)} ${h+10}Z" fill="${L.c}" style="--p:${-P}px;animation:waveSlide ${L.dur||10}s linear infinite${L.rev?' reverse':''}"/>`}
+  svg.innerHTML=out}
+// Brand wave (from the user's references): a mirrored sound wave, a white core inside blue, ink, lime and blue bands,
+// whose peaks travel along it. Draws the desktop backdrop here and the home banner.
+// o.amp: peak half-height as a share of the canvas height · o.base: band thickness scale · o.core: white core half-width (px)
+// o.level(): 0…1 swell target (e.g. playing vs paused) · o.glow: paint the blue/lime glow inside the canvas
+function brandWave(cv,o){
+  o=Object.assign({amp:.4,base:1,core:1.4,speed:1,level:()=>1,glow:false,maxDpr:3},o);
+  const ctx=cv.getContext('2d'),still=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  let W=0,H=0,dpr=1,t=0,last=0,level=o.level();
+  const LAYERS=[['#0062FF',1,3.4],['#9DFF00',.74,2.6],['#000B1C',.52,1.9],['#0062FF',.36,1.5]];  // colour, share of peak height, base half-width
+  // 0…1 amplitude along the wave: travelling bumps of different widths, so peaks rise and fall as they move
+  const env=(u,ph)=>Math.min(1,(.07+.5*Math.pow(Math.sin(u*Math.PI*3.2+t*.9+ph)*.5+.5,4)
+    +.75*Math.pow(Math.sin(u*Math.PI*1.6-t*.55+ph*1.9)*.5+.5,8)+.18*Math.pow(Math.sin(u*Math.PI*9.5+t*2.2+ph)*.5+.5,2))/1.15);
+  function size(){const r=cv.getBoundingClientRect(),k=r.width/cv.offsetWidth||1;dpr=Math.min(o.maxDpr,Math.max(1,k)*(devicePixelRatio||1));
+    W=cv.offsetWidth;H=cv.offsetHeight;cv.width=Math.max(1,Math.round(W*dpr));cv.height=Math.max(1,Math.round(H*dpr));draw()}
+  function draw(){if(!W||!H)return;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
+    const c=H/2,A=H*o.amp*level,step=Math.max(3,W/480),n=Math.ceil(W/step),top=[],bot=[];
+    for(let i=0;i<=n;i++){const u=i*step/W,e=env(u,0);top.push(e);bot.push(.55*e+.45*env(u,2.3))}
+    LAYERS.forEach(([col,share,base],li)=>{
+      ctx.shadowBlur=o.glow&&li<2?H*(li?.05:.08):0;ctx.shadowColor=li?'rgba(157,255,0,.35)':'rgba(0,98,255,.8)';
+      ctx.beginPath();base*=o.base;
+      for(let i=0;i<=n;i++)ctx.lineTo(i*step,c-base-A*share*top[i]);
+      for(let i=n;i>=0;i--)ctx.lineTo(i*step,c+base+A*share*bot[i]);
+      ctx.closePath();ctx.fillStyle=col;ctx.fill()});
+    ctx.shadowBlur=0;ctx.beginPath();
+    for(let i=0;i<=n;i++)ctx.lineTo(i*step,c-o.core*(1+.36*Math.sin(i*step/W*Math.PI*6+t*1.6)));
+    for(let i=n;i>=0;i--)ctx.lineTo(i*step,c+o.core*(1+.36*Math.sin(i*step/W*Math.PI*6+t*1.6+1)));
+    ctx.closePath();ctx.fillStyle='#FFFFFF';ctx.fill()}
+  function frame(now){const dt=last?Math.max(0,Math.min(.1,(now-last)/1000)):0;last=now;
+    if(cv.offsetWidth){level+=(o.level()-level)*Math.min(1,dt*3);t+=dt*o.speed*(.25+.75*level);draw()}   // hidden (phones): idle
+    requestAnimationFrame(frame)}
+  if(window.ResizeObserver)new ResizeObserver(size).observe(cv);size();
+  if(!still)requestAnimationFrame(frame)}
+brandWave($('#bgWave'),{amp:.3,base:6,core:7,speed:.5,glow:true,maxDpr:1.5});
+$('#fsBtn').onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}};
+// Restart replays the current feature's flow from its home screen (index.html is the demo selector)
+const rsb=$('#restartBtn');if(rsb)rsb.onclick=()=>{const f=store.get('flow','create');try{sessionStorage.clear()}catch(e){}go('home.html?flow='+f)};
+(function clock(){const c=$('#clock');if(!c)return;const tick=()=>{const d=new Date();c.textContent=(d.getHours()%12||12)+':'+String(d.getMinutes()).padStart(2,'0')};tick();setInterval(tick,15000)})();
+
+/* ───────── This page ───────── */
+/* ───────── Yangi Ijro shared: demo controller, toolbar steps, track model ───────── */
+store.set('flow','ijro');
+// Restart replays this feature from the phone's home screen
+if(rsb)rsb.onclick=()=>{try{sessionStorage.clear()}catch(e){}go('ijro.html')};
+// Jumping to a step from the toolbar plays the tour from there
+$$('.toolbar a[data-step]').forEach(a=>a.addEventListener('click',()=>store.set('demo',true)));
+function markStep(n){$$('.toolbar a[data-step]').forEach(a=>a.classList.toggle('on',+a.dataset.step===n))}
+
+// The automatic tour. Any real touch/key hands control to the user (and keeps the tour off on the next pages).
+const Demo={on:false,t:[],
+  active(){return store.get('demo',true)&&params.get('demo')!=='0'},
+  wait(ms){return new Promise((res,rej)=>{const id=setTimeout(()=>Demo.on?res():rej('stop'),ms);Demo.t.push(id)})},
+  stop(){if(!this.on)return;this.on=false;this.t.forEach(clearTimeout);this.t=[];this.onStop&&this.onStop()},
+  async run(fn){this.on=true;try{await fn()}catch(e){}}};
+['pointerdown','keydown','wheel'].forEach(ev=>$('#app').addEventListener(ev,e=>{if(!e.isTrusted)return;store.set('demo',false);if(Demo.on)Demo.stop()},{capture:true,passive:true}));
+const W=ms=>Demo.wait(ms);
+
+function tapFx(el){if(!el)return;el.classList.add('tap');setTimeout(()=>el.classList.remove('tap'),180)}
+function ripple(btn,x,y){const r=btn.getBoundingClientRect(),k=r.width/btn.offsetWidth||1,s=Math.max(r.width,r.height)*2.2/k,el=document.createElement('span');
+  if(x==null){x=r.left+r.width/2;y=r.top+r.height/2}
+  el.className='ripple';el.style.width=el.style.height=s+'px';el.style.left=((x-r.left)/k-s/2)+'px';el.style.top=((y-r.top)/k-s/2)+'px';btn.appendChild(el);setTimeout(()=>el.remove(),750)}
+// Demo tap: press animation (+ ripple on buttons that clip), then the element's own click handler
+async function demoTap(el,ms=260){tapFx(el);if(getComputedStyle(el).overflow==='hidden')ripple(el);await W(ms);el.click()}
+const fmt=s=>{s=Math.max(0,Math.floor(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+/* The track: the user's real recording, carried across pages (position + playing state live in store) */
+const TRACK={t:'Kerak emas (cover)',a:'Shukur Fazo & Shaxriyor',pl:'riitmda Yangi Ijro',src:'media/yangi-ijro.m4a',cover:'media/yangi-ijro-cover.jpg',dur:225.8};
+const NP=Object.assign({pos:0,playing:false},store.get('ijroNP',{}));
+const saveNP=()=>store.set('ijroNP',NP);
+const Likes={on(){return store.get('ijroLiked',false)},toggle(){const v=!this.on();store.set('ijroLiked',v);return v}};
+
+// <audio> + (on http) an analyser for artwork that reacts to the music.
+// Autoplay without a gesture can be refused: then the UI keeps running on a virtual clock and the first tap anywhere starts the sound there.
+const Track={el:null,ctx:null,an:null,fd:null,playing:false,blocked:false,vpos:0,vlast:0,subs:[],
+  init(){const a=this.el=document.createElement('audio');a.src=TRACK.src;a.preload='auto';document.body.appendChild(a);
+    a.addEventListener('loadedmetadata',()=>{if(NP.pos>0&&NP.pos<a.duration-1&&!this.blocked)a.currentTime=NP.pos});
+    a.addEventListener('ended',()=>this.end());
+    setInterval(()=>{if(this.playing){NP.pos=this.time();saveNP()}},500);
+    addEventListener('pagehide',()=>{NP.pos=this.time();saveNP();a.pause()});
+    $('#app').addEventListener('pointerdown',e=>{if(!e.isTrusted)return;this.unlock()},{capture:true});
+    this.vpos=NP.pos;return this},
+  on(fn){this.subs.push(fn)},emit(){this.subs.forEach(f=>f(this))},
+  dur(){const d=this.el&&this.el.duration;return isFinite(d)&&d>0?d:TRACK.dur},
+  time(){if(this.blocked){if(this.playing){const n=performance.now();this.vpos+=(n-this.vlast)/1000;this.vlast=n;if(this.vpos>=this.dur())this.end()}return this.vpos}
+    return this.el.readyState?this.el.currentTime:NP.pos},
+  async ctxUp(){const AC=window.AudioContext||window.webkitAudioContext;if(!AC||!/^https?:/.test(location.protocol))return;   // file:// would mute a routed element
+    try{this.ctx=this.ctx||new AC()}catch(e){return}
+    if(this.ctx.state!=='running')await Promise.race([this.ctx.resume(),new Promise(r=>setTimeout(r,350))]);
+    if(this.ctx.state==='running'&&!this.an){   // route the element only once the context can actually make sound
+      const s=this.ctx.createMediaElementSource(this.el);this.an=this.ctx.createAnalyser();this.an.fftSize=256;this.an.smoothingTimeConstant=.82;
+      s.connect(this.an);this.an.connect(this.ctx.destination);this.fd=new Uint8Array(this.an.frequencyBinCount)}},
+  async play(){const at=this.time();this.playing=true;NP.playing=true;saveNP();this.emit();
+    await this.ctxUp();if(!this.playing)return;
+    if(Math.abs(this.el.currentTime-at)>.5&&this.el.readyState)this.el.currentTime=at;
+    try{await this.el.play();this.blocked=false}
+    catch(e){if(!this.playing||e.name==='AbortError')return;this.blocked=true;this.vpos=at;this.vlast=performance.now()}
+    this.emit()},
+  pause(){NP.pos=this.time();this.playing=false;this.el.pause();NP.playing=false;saveNP();this.emit()},
+  toggle(){this.playing?this.pause():this.play()},
+  seek(t){t=Math.max(0,Math.min(this.dur()-.2,t));this.vpos=t;this.vlast=performance.now();if(this.el.readyState)this.el.currentTime=t;NP.pos=t;saveNP();this.emit()},
+  end(){this.playing=false;this.el.pause();this.vpos=0;if(this.el.readyState)this.el.currentTime=0;NP.pos=0;NP.playing=false;saveNP();this.emit();this.onEnd&&this.onEnd()},
+  unlock(){this.ctxUp().then(()=>{if(this.blocked&&this.playing){const at=this.time();if(this.el.readyState)this.el.currentTime=at;
+    this.el.play().then(()=>{this.blocked=false;this.emit()}).catch(()=>{})}})},
+  // 0…1 loudness of the low end (fake but steady when there's no analyser)
+  level(){if(!this.playing)return 0;if(this.an&&!this.blocked){this.an.getByteFrequencyData(this.fd);let s=0;for(let i=1;i<9;i++)s+=this.fd[i];return Math.min(1,s/8/255*1.15)}
+    const t=performance.now()/1000;return .45+.25*Math.max(0,Math.sin(t*Math.PI*2*1.6))}};
+
+const IC={
+  play:'<svg viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.2-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z" fill="currentColor"/></svg>',
+  pause:'<svg viewBox="0 0 24 24"><rect x="6.5" y="5" width="4" height="14" rx="1.2" fill="currentColor"/><rect x="13.5" y="5" width="4" height="14" rx="1.2" fill="currentColor"/></svg>',
+  heart:'<svg viewBox="0 0 24 24"><path d="M12 20.3s-7.6-4.6-9.3-9.4C1.6 7.6 3.9 4.6 7.3 4.6c2 0 3.7 1.1 4.7 2.8 1-1.7 2.7-2.8 4.7-2.8 3.4 0 5.7 3 4.6 6.3-1.7 4.8-9.3 9.4-9.3 9.4z"/></svg>'};
+
+/* ───── Player ───── */
+Track.init();markStep(6);
+const seekEl=$('#seek');
+$('#likeBtn').innerHTML=IC.heart;
+function renderLike(){$('#likeBtn').classList.toggle('on',Likes.on())}
+renderLike();
+function render(){const p=Track.playing;$('#ppBtn').innerHTML=p?IC.pause:IC.play;$('#ppBtn').setAttribute('aria-label',p?'Pause':'Play');
+  document.body.classList.toggle('paused',!p);$('#hear').hidden=!(p&&Track.blocked)}
+Track.on(render);render();
+
+let seeking=false,glow=0;
+(function frame(){const t=Track.time(),d=Track.dur(),k=Math.min(1,t/d),lv=Track.level();
+  $('#fill').style.width=(k*100).toFixed(3)+'%';$('#knob').style.left=(k*100).toFixed(3)+'%';
+  $('#tCur').textContent=fmt(t);$('#tLeft').textContent='-'+fmt(d-t);seekEl.setAttribute('aria-valuenow',Math.round(t));seekEl.setAttribute('aria-valuemax',Math.round(d));
+  // the cover stays still (only the play/pause resize); just the ambient glow follows the music, smoothed so it doesn't flicker
+  glow+=((Track.playing?.25+lv*.75:0)-glow)*.06;$('#ambGlow').style.opacity=glow.toFixed(3);document.body.style.setProperty('--lv',(glow*.6).toFixed(3));
+  requestAnimationFrame(frame)})();
+
+function seekTo(e){const r=seekEl.getBoundingClientRect();Track.seek(Math.min(1,Math.max(0,(e.clientX-r.left)/r.width))*Track.dur())}
+seekEl.addEventListener('pointerdown',e=>{seeking=true;seekEl.setPointerCapture(e.pointerId);seekTo(e)});
+seekEl.addEventListener('pointermove',e=>{if(seeking)seekTo(e)});
+['pointerup','pointercancel'].forEach(ev=>seekEl.addEventListener(ev,()=>seeking=false));
+seekEl.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();Track.seek(Track.time()+(e.key==='ArrowRight'?5:-5))}});
+
+$('#ppBtn').onclick=()=>Track.toggle();
+$('#prevBtn').onclick=()=>{Track.seek(0);if(!Track.playing)Track.play();toast('From the top')};
+$('#nextBtn').onclick=()=>toast('Kerak emas is the only track in this preview');
+$('#likeBtn').onclick=()=>{const on=Likes.toggle();renderLike();toast(on?'Added to Liked songs':'Removed from Liked songs')};
+let repeat=false;
+$('#repBtn').onclick=e=>{repeat=!repeat;e.currentTarget.classList.toggle('on',repeat);toast(repeat?'Repeat is on':'Repeat is off')};
+Track.onEnd=()=>{if(repeat)Track.play()};
+$('#dlBtn').onclick=e=>{const b=e.currentTarget;if(b.classList.contains('done'))return toast('Already downloaded');toast('Downloading…');setTimeout(()=>{b.classList.add('done');toast('Saved for offline listening')},1500)};
+$('#addBtn').onclick=()=>toast('Added to “My playlist”');
+$('#shareBtn').onclick=()=>{try{navigator.clipboard.writeText(location.href.split('?')[0]).catch(()=>{})}catch(e){}toast('Link copied')};
+$('#moreBtn').onclick=()=>toast('Go to artist · Lyrics · Sleep timer');
+$('#queueBtn').onclick=()=>toast('Playing from riitmda Yangi Ijro');
+$('#albumBtn').onclick=()=>go('ijro-app.html?at=foryou&demo=0');
+$('#downBtn').onclick=()=>go('ijro-app.html?at=foryou&demo=0');
+$('#hear').onclick=()=>Track.unlock();
+
+// From a Play button, or still playing from the home screen: keep going. From the playlist: wait for Play.
+if(params.get('play')==='1'||NP.playing)Track.play();
+else if(Demo.active())Demo.run(async()=>{await W(1800);const b=$('#ppBtn');tapFx(b);await W(200);Track.play()});
+
+</script>
+</body>
+</html>
