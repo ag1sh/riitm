@@ -33,8 +33,8 @@ a{color:inherit}
 svg{display:block}
 .stage{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
 .stage-bg{position:fixed;inset:0;z-index:0;overflow:hidden}
-.stage-bg svg{width:100%;height:100%}
-.stage-bg::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 34% 55% at 50% 48%,rgba(11,12,16,.7),rgba(11,12,16,.25) 75%)}
+.stage-bg canvas{display:block;width:100%;height:100%}
+.stage-bg::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 34% 55% at 50% 48%,rgba(11,12,16,.6),rgba(11,12,16,0) 75%)}
 .device-wrap{position:relative;z-index:1;width:410px;height:864px;flex:none}
 .device{position:absolute;left:0;top:0;width:410px;height:864px;padding:10px;border-radius:60px;
   background:linear-gradient(150deg,#3b3e47,#121318 28%,#0a0b0e 70%,#2b2e36);
@@ -154,9 +154,8 @@ body.leaving .app{animation:leave .42s var(--ease) forwards}
 .field-in:focus{border-color:rgba(182,255,56,.55);box-shadow:0 0 0 4px rgba(182,255,56,.08)}
 
 .hdr.bar .logo,.hdr.bar .logo svg{height:24px}
-.banner{position:relative;height:104px;margin:2px 0 0;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
-.banner svg{width:100%;height:100%}
-.banner.paused path{animation-play-state:paused}
+.banner{position:relative;height:84px;margin:10px 0 6px;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.banner canvas{display:block;width:100%;height:100%;filter:drop-shadow(0 0 9px rgba(0,98,255,.55)) drop-shadow(0 0 16px rgba(157,255,0,.22))}
 .mix{display:flex;justify-content:center;align-items:center;gap:12px;margin-top:12px}
 .mix-pill{position:relative;overflow:hidden;display:flex;align-items:center;gap:12px;height:50px;padding:0 26px 0 6px;border-radius:999px;background:var(--lime);color:#0B0C10;font:700 16px var(--fb);
   box-shadow:0 10px 30px -10px rgba(182,255,56,.7);transition:transform .2s var(--ease)}
@@ -233,7 +232,7 @@ body.leaving .app{animation:leave .42s var(--ease) forwards}
 </head>
 <body>
 <div class="stage">
-  <div class="stage-bg" aria-hidden="true"><svg id="bgWaves"></svg></div>
+  <div class="stage-bg" aria-hidden="true"><canvas id="bgWave"></canvas></div>
 
   <div class="device-wrap" id="wrap"><div class="device" id="device"><div class="screen">
     <div class="app" id="app">
@@ -250,7 +249,7 @@ body.leaving .app{animation:leave .42s var(--ease) forwards}
       </header>
 
       <main class="scroll">
-        <div class="banner reveal" style="--d:1" id="banner" aria-hidden="true"><svg id="bannerWaves"></svg></div>
+        <div class="banner reveal" style="--d:1" id="banner" aria-hidden="true"><canvas id="bannerWave"></canvas></div>
         <div class="mix reveal" style="--d:2">
           <button class="mix-pill" id="mixBtn"><span class="pp"><svg class="i-pause" viewBox="0 0 24 24"><rect x="6" y="5" width="4" height="14" rx="1.3"/><rect x="14" y="5" width="4" height="14" rx="1.3"/></svg><svg class="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg></span>My riitm</button>
           <button class="icon-btn" id="tuneBtn" aria-label="Tune My riitm"><svg class="ico" viewBox="0 0 24 24"><path d="M4 7h16M7 12h10M10 17h4"/></svg></button>
@@ -335,10 +334,39 @@ function makeWaves(svg,w,h,bg,layers){
     for(let x=0;x<=w+P+0.1;x+=step){const y=L.y+L.amp*Math.sin(2*Math.PI*x/P+(L.ph||0))+(L.amp2||0)*Math.sin(4*Math.PI*x/P+(L.ph||0)*1.7);d+=`L${x.toFixed(1)} ${y.toFixed(1)}`}
     out+=`<path d="${d}L${(w+P).toFixed(1)} ${h+10}Z" fill="${L.c}" style="--p:${-P}px;animation:waveSlide ${L.dur||10}s linear infinite${L.rev?' reverse':''}"/>`}
   svg.innerHTML=out}
-makeWaves($('#bgWaves'),1600,1000,'#0062FF',[
-  {y:120,amp:90,amp2:30,c:'#9DFF00',period:1600,dur:40,ph:.4},{y:300,amp:110,amp2:25,c:'#000B1C',period:1600,dur:46,rev:1,ph:2},
-  {y:360,amp:110,amp2:25,c:'#0062FF',period:1600,dur:46,rev:1,ph:2},{y:560,amp:120,amp2:40,c:'#9DFF00',period:1600,dur:38,ph:4},
-  {y:640,amp:120,amp2:40,c:'#000B1C',period:1600,dur:38,ph:4.2},{y:820,amp:90,amp2:20,c:'#0062FF',period:1600,dur:50,rev:1,ph:1}]);
+// Brand wave (from the user's references): a mirrored sound wave, a white core inside blue, ink, lime and blue bands,
+// whose peaks travel along it. Draws the desktop backdrop here and the home banner.
+// o.amp: peak half-height as a share of the canvas height · o.base: band thickness scale · o.core: white core half-width (px)
+// o.level(): 0…1 swell target (e.g. playing vs paused) · o.glow: paint the blue/lime glow inside the canvas
+function brandWave(cv,o){
+  o=Object.assign({amp:.4,base:1,core:1.4,speed:1,level:()=>1,glow:false,maxDpr:3},o);
+  const ctx=cv.getContext('2d'),still=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  let W=0,H=0,dpr=1,t=0,last=0,level=o.level();
+  const LAYERS=[['#0062FF',1,3.4],['#9DFF00',.74,2.6],['#000B1C',.52,1.9],['#0062FF',.36,1.5]];  // colour, share of peak height, base half-width
+  // 0…1 amplitude along the wave: travelling bumps of different widths, so peaks rise and fall as they move
+  const env=(u,ph)=>Math.min(1,(.07+.5*Math.pow(Math.sin(u*Math.PI*3.2+t*.9+ph)*.5+.5,4)
+    +.75*Math.pow(Math.sin(u*Math.PI*1.6-t*.55+ph*1.9)*.5+.5,8)+.18*Math.pow(Math.sin(u*Math.PI*9.5+t*2.2+ph)*.5+.5,2))/1.15);
+  function size(){const r=cv.getBoundingClientRect(),k=r.width/cv.offsetWidth||1;dpr=Math.min(o.maxDpr,Math.max(1,k)*(devicePixelRatio||1));
+    W=cv.offsetWidth;H=cv.offsetHeight;cv.width=Math.max(1,Math.round(W*dpr));cv.height=Math.max(1,Math.round(H*dpr));draw()}
+  function draw(){if(!W||!H)return;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
+    const c=H/2,A=H*o.amp*level,step=Math.max(3,W/480),n=Math.ceil(W/step),top=[],bot=[];
+    for(let i=0;i<=n;i++){const u=i*step/W,e=env(u,0);top.push(e);bot.push(.55*e+.45*env(u,2.3))}
+    LAYERS.forEach(([col,share,base],li)=>{
+      ctx.shadowBlur=o.glow&&li<2?H*(li?.05:.08):0;ctx.shadowColor=li?'rgba(157,255,0,.35)':'rgba(0,98,255,.8)';
+      ctx.beginPath();base*=o.base;
+      for(let i=0;i<=n;i++)ctx.lineTo(i*step,c-base-A*share*top[i]);
+      for(let i=n;i>=0;i--)ctx.lineTo(i*step,c+base+A*share*bot[i]);
+      ctx.closePath();ctx.fillStyle=col;ctx.fill()});
+    ctx.shadowBlur=0;ctx.beginPath();
+    for(let i=0;i<=n;i++)ctx.lineTo(i*step,c-o.core*(1+.36*Math.sin(i*step/W*Math.PI*6+t*1.6)));
+    for(let i=n;i>=0;i--)ctx.lineTo(i*step,c+o.core*(1+.36*Math.sin(i*step/W*Math.PI*6+t*1.6+1)));
+    ctx.closePath();ctx.fillStyle='#FFFFFF';ctx.fill()}
+  function frame(now){const dt=last?Math.max(0,Math.min(.1,(now-last)/1000)):0;last=now;
+    if(cv.offsetWidth){level+=(o.level()-level)*Math.min(1,dt*3);t+=dt*o.speed*(.25+.75*level);draw()}   // hidden (phones): idle
+    requestAnimationFrame(frame)}
+  if(window.ResizeObserver)new ResizeObserver(size).observe(cv);size();
+  if(!still)requestAnimationFrame(frame)}
+brandWave($('#bgWave'),{amp:.3,base:6,core:7,speed:.5,glow:true,maxDpr:1.5});
 $('#fsBtn').onclick=()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}};
 // Restart replays the current feature's flow from its home screen (index.html is the demo selector)
 const rsb=$('#restartBtn');if(rsb)rsb.onclick=()=>{const f=store.get('flow','create');try{sessionStorage.clear()}catch(e){}go('home.html?flow='+f)};
@@ -469,14 +497,8 @@ function miniCover(seed,c){const R=rng(seed);let d='';for(let i=0;i<3;i++){let p
   return `<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice"><rect width="100" height="100" fill="${c[0]}"/><circle cx="${30+R()*40}" cy="${28+R()*10}" r="${12+R()*8}" fill="${c[4]||'#B6FF38'}" opacity=".9"/>${d}</svg>`}
 
 /* ───── Home ───── */
-const BRAND_BAND=[
-  {y:18,amp:12,amp2:5,c:'#9DFF00',period:390,dur:7,ph:.2},
-  {y:34,amp:13,amp2:5,c:'#FFFFFF',period:390,dur:9,rev:1,ph:1.1},
-  {y:48,amp:13,amp2:6,c:'#0062FF',period:390,dur:6.5,ph:2},
-  {y:60,amp:12,amp2:5,c:'#000B1C',period:390,dur:8,rev:1,ph:2.9},
-  {y:66,amp:12,amp2:5,c:'#9DFF00',period:390,dur:8,rev:1,ph:2.9},
-  {y:82,amp:11,amp2:4,c:'#0B0C10',period:390,dur:7.5,ph:3.6}];
-makeWaves($('#bannerWaves'),390,104,null,BRAND_BAND);
+// Home banner: the brand wave, swelling while My riitm plays and settling when paused
+brandWave($('#bannerWave'),{level:()=>$('#banner').classList.contains('paused')?.3:1});
 makeWaves($('#cardWaves'),200,90,null,[
   {y:28,amp:9,c:'#9DFF00',period:200,dur:5},{y:40,amp:9,c:'#FFFFFF',period:200,dur:6,rev:1,ph:1},
   {y:50,amp:9,c:'#0062FF',period:200,dur:5.5,ph:2},{y:62,amp:9,c:'#08174a',period:200,dur:6,rev:1,ph:2.6}]);
